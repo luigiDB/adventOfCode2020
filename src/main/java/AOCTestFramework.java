@@ -16,40 +16,40 @@ public class AOCTestFramework {
     private static final Function<String, String> stringTransformer = x -> x;
 
     public static Stream<Integer> parseInteger(String input) {
-        return parseDirectInput(input, integerTransformer);
+        return parseInput(input, integerTransformer);
     }
 
     public static Stream<Integer> parseInteger(Path fileName) {
-        return parseFileInput(fileName, integerTransformer);
+        return parseInput(fileName, integerTransformer);
     }
 
     public static Stream<String> parseStrings(String input) {
-        return parseDirectInput(input, stringTransformer);
+        return parseInput(input, stringTransformer);
     }
 
     public static Stream<String> parseStrings(Path fileName) {
-        return parseFileInput(fileName, stringTransformer);
+        return parseInput(fileName, stringTransformer);
     }
 
     public static Stream<String> parseStrings(String input, String separator) {
-        return parseDirectInput(input, stringTransformer, separator);
+        return parseInput(input, stringTransformer, separator);
     }
 
     public static Stream<String> parseStrings(Path fileName, String separator) {
-        return parseFileInput(fileName, stringTransformer, separator);
+        return parseInput(fileName, stringTransformer, separator);
     }
 
     public static <T> T[][] parseMatrix(String input, Class<T> clazz, Function<Character, T> transformer) {
         List<String> fileContent = Arrays.asList(input.split("\n"));
-        return compileMatrix(clazz, transformer, fileContent);
+        return compileMatrix(fileContent, clazz, transformer);
     }
 
     public static <T> T[][] parseMatrix(Path fileName, Class<T> clazz, Function<Character, T> transformer) {
         List<String> lines = getListFile(fileName);
-        return compileMatrix(clazz, transformer, lines);
+        return compileMatrix(lines, clazz, transformer);
     }
 
-    private static <T> T[][] compileMatrix(Class<T> clazz, Function<Character, T> transformer, List<String> fileContent) {
+    private static <T> T[][] compileMatrix(List<String> fileContent, Class<T> clazz, Function<Character, T> transformer) {
         int rows = fileContent.size();
         int columns = fileContent.get(0).length();
         @SuppressWarnings("unchecked")
@@ -72,20 +72,19 @@ public class AOCTestFramework {
         }
     }
 
-    // low level interfaces
-    public static <T> Stream<T> parseFileInput(Path fileName, Function<String, T> lineTransformer) {
-        return parseDirectInput(getStringFile(fileName), lineTransformer, "\n");
+    public static <T> Stream<T> parseInput(Path fileName, Function<String, T> lineTransformer) {
+        return parseInput(getStringFile(fileName), lineTransformer, "\n");
     }
 
-    public static <T> Stream<T> parseDirectInput(String content, Function<String, T> lineTransformer) {
-        return parseDirectInput(content, lineTransformer, "\n");
+    public static <T> Stream<T> parseInput(String content, Function<String, T> lineTransformer) {
+        return parseInput(content, lineTransformer, "\n");
     }
 
-    public static <T> Stream<T> parseFileInput(Path fileName, Function<String, T> lineTransformer, String separator) {
-        return parseDirectInput(getStringFile(fileName), lineTransformer, separator);
+    public static <T> Stream<T> parseInput(Path fileName, Function<String, T> lineTransformer, String separator) {
+        return parseInput(getStringFile(fileName), lineTransformer, separator);
     }
 
-    public static <T> Stream<T> parseDirectInput(String content, Function<String, T> lineTransformer, String separator) {
+    public static <T> Stream<T> parseInput(String content, Function<String, T> lineTransformer, String separator) {
         return Stream.of(content.split(separator))
                 .map(lineTransformer);
     }
