@@ -1,9 +1,8 @@
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class Day4Test {
     private String testInput = "ecl:gry pid:860033327 eyr:2020 hcl:#fffffd\n" +

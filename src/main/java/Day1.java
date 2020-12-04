@@ -1,4 +1,6 @@
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class Day1 {
     public static int es1(List<Integer> input) {
@@ -6,7 +8,7 @@ public class Day1 {
     }
 
     private static int find_sum(List<Integer> input, int target) {
-        Set<Integer> seen = new HashSet<Integer>();
+        Set<Integer> seen = new HashSet<>();
         for (int current : input) {
             int match = target - current;
             if (seen.contains(match)) {
