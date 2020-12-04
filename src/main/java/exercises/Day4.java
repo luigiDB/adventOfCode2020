@@ -1,3 +1,5 @@
+package exercises;
+
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -95,13 +97,11 @@ public class Day4 {
 
         private boolean heightValidation(String str) {
             if (str.contains("cm")) {
-                String s = str.replace("c", "");
-                s = s.replace("m", "");
+                String s = str.replace("cm", "");
                 return rangeValidation(s, 150, 193);
             }
             if (str.contains("in")) {
-                String s = str.replace("i", "");
-                s = s.replace("n", "");
+                String s = str.replace("in", "");
                 return rangeValidation(s, 59, 76);
             }
             return false;

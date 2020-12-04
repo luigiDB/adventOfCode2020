@@ -1,8 +1,13 @@
+package exercises;
+
 import org.junit.Test;
+import utilities.AOCTestFramework;
 
 import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
+import static utilities.AOCTestFramework.getTestInput;
+import static utilities.AOCTestFramework.parseStrings;
 
 public class Day4Test {
     private String testInput = "ecl:gry pid:860033327 eyr:2020 hcl:#fffffd\n" +
@@ -23,12 +28,12 @@ public class Day4Test {
 
     @Test
     public void es1Test() {
-        assertEquals(2, Day4.es1(AOCTestFramework.parseStrings(testInput, passportSeparator)));
+        assertEquals(2, Day4.es1(parseStrings(testInput, passportSeparator)));
     }
 
     @Test
     public void es1() {
-        Stream<String> input = AOCTestFramework.parseStrings(AOCTestFramework.getTestInput("4"), passportSeparator);
+        Stream<String> input = parseStrings(getTestInput("4"), passportSeparator);
         System.out.println(Day4.es1(input));
     }
 
@@ -47,7 +52,7 @@ public class Day4Test {
                 "hgt:59cm ecl:zzz\n" +
                 "eyr:2038 hcl:74454a iyr:2023\n" +
                 "pid:3556412378 byr:2007";
-        assertEquals(0, Day4.es2(AOCTestFramework.parseStrings(passports, passportSeparator)));
+        assertEquals(0, Day4.es2(parseStrings(passports, passportSeparator)));
     }
 
     @Test
@@ -64,12 +69,12 @@ public class Day4Test {
                 "eyr:2022\n" +
                 "\n" +
                 "iyr:2010 hgt:158cm hcl:#b6652a ecl:blu byr:1944 eyr:2021 pid:093154719";
-        assertEquals(4, Day4.es2(AOCTestFramework.parseStrings(passports, passportSeparator)));
+        assertEquals(4, Day4.es2(parseStrings(passports, passportSeparator)));
     }
 
     @Test
     public void es2() {
-        Stream<String> input = AOCTestFramework.parseStrings(AOCTestFramework.getTestInput("4"), passportSeparator);
+        Stream<String> input = parseStrings(getTestInput("4"), passportSeparator);
         System.out.println(Day4.es2(input));
     }
 }
