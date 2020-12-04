@@ -1,19 +1,18 @@
 import java.util.Arrays;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class Day4 {
 
-    public static long es1(String testInput) {
-        String[] split = testInput.split("\r\r");
-        return Arrays.stream(split)
+    public static long es1(Stream<String> testInput) {
+        return testInput
                 .map(Passport::new)
                 .filter(Passport::fieldsPresenceValidation)
                 .count();
     }
 
-    public static long es2(String testInput) {
-        String[] split = testInput.split("\r\r");
-        return Arrays.stream(split)
+    public static long es2(Stream<String> testInput) {
+        return testInput
                 .map(Passport::new)
                 .filter(Passport::fieldsValidation)
                 .count();
@@ -30,7 +29,7 @@ public class Day4 {
         private String cid = "";
 
         public Passport(String init) {
-            for (String line : init.split("\r")) {
+            for (String line : init.split("\n")) {
                 for (String field : line.split(" ")) {
                     String[] value = field.split(":");
                     switch (value[0]) {
