@@ -1,7 +1,6 @@
 package exercises;
 
 import org.junit.Test;
-import utilities.AOCTestFramework;
 
 import static org.junit.Assert.assertEquals;
 import static utilities.AOCTestFramework.getTestInput;

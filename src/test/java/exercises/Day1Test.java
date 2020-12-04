@@ -1,7 +1,6 @@
 package exercises;
 
 import org.junit.Test;
-import utilities.AOCTestFramework;
 
 import java.util.List;
 import java.util.stream.Collectors;
