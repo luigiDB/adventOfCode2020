@@ -15,14 +15,14 @@ public class Day8 {
     public static int es2(Stream<Instruction> input) {
         List<Instruction> instructions = input.collect(Collectors.toList());
         for (int i = 0; i < instructions.size(); i++) {
-            Pair<Boolean, Integer> result = tryInvertCommand(instructions, i);
+            Pair<Boolean, Integer> result = invertCommand(instructions, i);
             if (result.getLeft())
                 return result.getRight();
         }
         return 0;
     }
 
-    private static Pair<Boolean, Integer> tryInvertCommand(List<Instruction> instructions, int i) {
+    private static Pair<Boolean, Integer> invertCommand(List<Instruction> instructions, int i) {
         Instruction current = instructions.get(i);
         if (current.getCommand().equals(Command.JMP)) {
             Pair<Boolean, Integer> result = setCommandAtIndex(instructions, current, i, Command.NOP);
@@ -91,7 +91,6 @@ public class Day8 {
 
     public static class Instruction {
         private final Command command;
-
         private final int argument;
 
         public static Instruction of(Command command, int argument) {
