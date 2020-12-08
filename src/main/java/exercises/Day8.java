@@ -15,22 +15,34 @@ public class Day8 {
     public static int es2(Stream<Instruction> input) {
         List<Instruction> instructions = input.collect(Collectors.toList());
         for (int i = 0; i < instructions.size(); i++) {
-            Instruction current = instructions.get(i);
-            if(current.getCommand().equals(Command.JMP)) {
-                instructions.set(i, Instruction.of(Command.NOP, current.getArgument()));
-                Pair<Boolean, Integer> result = driver(instructions);
-                if (result.getLeft())
-                    return result.getRight();
-                instructions.set(i, current);
-            } else if(current.getCommand().equals(Command.NOP)) {
-                instructions.set(i, Instruction.of(Command.JMP, current.getArgument()));
-                Pair<Boolean, Integer> result = driver(instructions);
-                if (result.getLeft())
-                    return result.getRight();
-                instructions.set(i, current);
-            }
+            Pair<Boolean, Integer> result = tryInvertCommand(instructions, i);
+            if (result.getLeft())
+                return result.getRight();
         }
         return 0;
+    }
+
+    private static Pair<Boolean, Integer> tryInvertCommand(List<Instruction> instructions, int i) {
+        Instruction current = instructions.get(i);
+        if (current.getCommand().equals(Command.JMP)) {
+            Pair<Boolean, Integer> result = setCommandAtIndex(instructions, current, i, Command.NOP);
+            if (result.getLeft())
+                return result;
+        } else if (current.getCommand().equals(Command.NOP)) {
+            Pair<Boolean, Integer> result = setCommandAtIndex(instructions, current, i, Command.JMP);
+            if (result.getLeft())
+                return result;
+        }
+        return Pair.of(false, 0);
+    }
+
+    private static Pair<Boolean, Integer> setCommandAtIndex(List<Instruction> instructions, Instruction current, int i, Command cmd) {
+        instructions.set(i, Instruction.of(cmd, current.getArgument()));
+        Pair<Boolean, Integer> result = driver(instructions);
+        if (result.getLeft())
+            return result;
+        instructions.set(i, current);
+        return Pair.of(false, 0);
     }
 
     private static Pair<Boolean, Integer> driver(List<Instruction> instructions) {
