@@ -4,8 +4,8 @@ import computer.InstructionParser;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static utilities.AOCTestFramework.*;
-import static utilities.AOCTestFramework.parseStrings;
+import static utilities.AOCTestFramework.getTestInput;
+import static utilities.AOCTestFramework.parseInput;
 
 public class Day8Test {
     private String testInput = "nop +0\n" +

@@ -5,7 +5,8 @@ import org.junit.Test;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
-import static utilities.AOCTestFramework.*;
+import static utilities.AOCTestFramework.getTestInput;
+import static utilities.AOCTestFramework.parseStrings;
 
 public class Day6Test {
     private String testInput = "abc\n" +
