@@ -2,6 +2,8 @@ package computer.instruction;
 
 import computer.Computer;
 
+import java.util.List;
+
 public class Jmp implements Instruction {
     private int value;
 
@@ -17,5 +19,10 @@ public class Jmp implements Instruction {
     @Override
     public Instruction copy() {
         return new Jmp(this.value);
+    }
+
+    @Override
+    public List<Integer> parameters() {
+        return List.of(value);
     }
 }

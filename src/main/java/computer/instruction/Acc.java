@@ -2,6 +2,8 @@ package computer.instruction;
 
 import computer.Computer;
 
+import java.util.List;
+
 public class Acc implements Instruction {
 
     private int value;
@@ -19,5 +21,10 @@ public class Acc implements Instruction {
     @Override
     public Instruction copy() {
         return new Acc(this.value);
+    }
+
+    @Override
+    public List<Integer> parameters() {
+        return List.of(value);
     }
 }

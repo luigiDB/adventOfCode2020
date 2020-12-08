@@ -16,7 +16,7 @@ public class InstructionParser {
             case "jmp":
                 return new Jmp(parameter);
             case "nop":
-                return new Nop();
+                return new Nop(parameter);
             default:
                 throw new UnsupportedOperationException("Cannot parse " + split[0].trim());
         }
