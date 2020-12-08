@@ -1,5 +1,6 @@
 package exercises;
 
+import computer.InstructionParser;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -19,12 +20,14 @@ public class Day8Test {
 
     @Test
     public void es1Test() {
-        assertEquals(5, Day8.es1(parseInput(testInput, Day8::parser)));
+        assertEquals(5, Day8.es1(parseInput(testInput, InstructionParser::parser)));
     }
 
     @Test
     public void es1() {
-        System.out.println(Day8.es1(parseInput(getTestInput("8"), Day8::parser)));
+        int x = Day8.es1(parseInput(getTestInput("8"), InstructionParser::parser));
+        assertEquals(1723, x);
+        System.out.println(x);
     }
 
     @Test
@@ -38,17 +41,19 @@ public class Day8Test {
                 "acc +1\n" +
                 "nop -4\n" +
                 "acc +6";
-        assertEquals(8, Day8.es1(parseInput(terminatingProgram, Day8::parser)));
+        assertEquals(8, Day8.es1(parseInput(terminatingProgram, InstructionParser::parser)));
     }
 
 
     @Test
     public void es2Test() {
-        assertEquals(8, Day8.es2(parseInput(testInput, Day8::parser)));
+        assertEquals(8, Day8.es2(parseInput(testInput, InstructionParser::parser)));
     }
 
     @Test
     public void es2() {
-        System.out.println(Day8.es2(parseInput(getTestInput("8"), Day8::parser)));
+        int x = Day8.es2(parseInput(getTestInput("8"), InstructionParser::parser));
+        assertEquals(846, x);
+        System.out.println(x);
     }
 }
