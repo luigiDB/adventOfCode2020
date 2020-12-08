@@ -1,8 +1,13 @@
 package exercises;
 
 import org.apache.commons.lang3.tuple.Pair;
+import utilities.ContinuousMatrix;
+import utilities.IMatrix;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Day5 {
@@ -26,6 +31,23 @@ public class Day5 {
         return evaluateId(nextSequentialPlace(lastConsecutiveOccupiedPlace));
     }
 
+//    public static int es2Redo(Stream<String> input) {
+//        List<String> collect = input.collect(Collectors.toList());
+//        ContinuousMatrix<Boolean> matrix = new ContinuousMatrix(Boolean.class, collect.size(), collect.get(0).length(), false);
+//
+//        collect.stream()
+//                .map(Day5::evaluatePosition)
+//                .forEach(pos -> matrix.set(pos, true));
+//
+//        while (matrix.hasNext()) {
+//            Optional<Boolean> next = matrix.next();
+//            if (matrix.previous().get() &&
+//                next.get() &&
+//                    matrix.next().get())
+//                return matrix.nextIndex().
+//        }
+//    }
+
     private static Pair<Integer, Integer> areSequential(Pair<Integer, Integer> base, Pair<Integer, Integer> next) {
         if (base.equals(Pair.of(0, 0)))
             return next;
@@ -45,14 +67,14 @@ public class Day5 {
     }
 
     private static Pair<Integer, Integer> evaluatePosition(String passport) {
-        int row = getPos(127, 'F', 'B', passport.substring(0, 7));
-        int column = getPos(7, 'L', 'R', passport.substring(7, 10));
+        int row = getPos('F', 'B', passport.substring(0, 7));
+        int column = getPos('L', 'R', passport.substring(7, 10));
         return Pair.of(row, column);
     }
 
-    private static int getPos(int max, char lower, char upper, String string) {
+    private static int getPos(char lower, char upper, String string) {
         int start = 0;
-        int end = max;
+        int end = (int) Math.pow(2, string.length()) - 1;
         for (int i = 0; i < string.length(); i++) {
             char c = string.charAt(i);
             int mid = (start + end) / 2;
