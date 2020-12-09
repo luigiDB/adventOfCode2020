@@ -2,6 +2,7 @@ package utilities;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.math.BigInteger;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -15,6 +16,7 @@ import java.util.stream.Stream;
 public class AOCTestFramework {
 
     private static final Function<String, Integer> integerTransformer = x -> Integer.valueOf(x.replace('+', ' ').trim());
+    private static final Function<String, BigInteger> BigIntegerTransformer = (String x) -> new BigInteger(x.replace('+', ' ').trim());
     private static final Function<String, String> stringTransformer = x -> x;
 
     public static Stream<Integer> parseInteger(String input) {
@@ -23,6 +25,14 @@ public class AOCTestFramework {
 
     public static Stream<Integer> parseInteger(Path fileName) {
         return parseInput(fileName, integerTransformer);
+    }
+
+    public static Stream<BigInteger> parseBigInteger(String input) {
+        return parseInput(input, BigIntegerTransformer);
+    }
+
+    public static Stream<BigInteger> parseBigInteger(Path fileName) {
+        return parseInput(fileName, BigIntegerTransformer);
     }
 
     public static Stream<String> parseStrings(String input) {
