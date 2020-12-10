@@ -6,29 +6,27 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Day10 {
-    public static int es1(Stream<Integer> input) {
-        List<Integer> sorted = input.collect(Collectors.toList());
-        sorted.add(0);
+    public static BigInteger es1(Stream<BigInteger> input) {
+        List<BigInteger> sorted = input.collect(Collectors.toList());
+        sorted.add(BigInteger.ZERO);
         Collections.sort(sorted);
-        int dist1 = 0;
-        int dist2 = 0;
-        int dist3 = 0;
+        BigInteger dist1 = BigInteger.ZERO;
+        BigInteger dist3 = BigInteger.ZERO;
         for (int i = 1; i < sorted.size(); i++) {
-            switch (sorted.get(i) - sorted.get(i - 1)) {
+            switch (sorted.get(i).subtract(sorted.get(i - 1)).intValue()) {
                 case 1:
-                    dist1++;
+                    dist1 = dist1.add(BigInteger.ONE);
                     break;
                 case 2:
-                    dist2++;
                     break;
                 case 3:
-                    dist3++;
+                    dist3 = dist3.add(BigInteger.ONE);
                     break;
                 default:
                     throw new UnsupportedOperationException("Not supported distance");
             }
         }
-        return dist1 * (dist3 + 1);
+        return dist1.multiply(dist3.add(BigInteger.ONE));
     }
 
 
@@ -70,8 +68,7 @@ public class Day10 {
 
         Set<Integer> set = new HashSet<>(sorted);
         Map<Integer, BigInteger> memoization = new HashMap<>();
-        BigInteger next = next(set, 0, memoization);
-        return next;
+        return next(set, 0, memoization);
     }
 
     private static BigInteger next(Set<Integer> set, int current, Map<Integer, BigInteger> memoization) {

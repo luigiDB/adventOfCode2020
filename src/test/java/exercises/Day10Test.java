@@ -6,8 +6,7 @@ import java.math.BigInteger;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static utilities.AOCTestFramework.getTestInput;
-import static utilities.AOCTestFramework.parseInteger;
+import static utilities.AOCTestFramework.*;
 
 public class Day10Test {
     private String simpleInput = "16\n" +
@@ -56,18 +55,18 @@ public class Day10Test {
 
     @Test
     public void es1SimpleTest() {
-        assertEquals(35, Day10.es1(parseInteger(simpleInput)));
+        assertEquals(0, BigInteger.valueOf(35).compareTo(Day10.es1(parseBigInteger(simpleInput))));
     }
 
     @Test
     public void es1MediumTest() {
-        assertEquals(220, Day10.es1(parseInteger(mediumInput)));
+        assertEquals(0, BigInteger.valueOf(220).compareTo(Day10.es1(parseBigInteger(mediumInput))));
     }
 
     @Test
     public void es1() {
-        int x = Day10.es1(parseInteger(getTestInput("10")));
-        assertEquals(1984, x);
+        BigInteger x = Day10.es1(parseBigInteger(getTestInput("10")));
+        assertEquals(0, x.compareTo(BigInteger.valueOf(1984)));
         System.out.println(x);
     }
 
