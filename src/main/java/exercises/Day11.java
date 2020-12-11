@@ -1,32 +1,22 @@
 package exercises;
 
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.function.Function;
+
 public class Day11 {
     public static int es1(Character[][] matrix) {
-        int height = matrix.length;
-        int wide = matrix[0].length;
-
-        Character[][] current = cloneMatrix(matrix);
-        while (true) {
-            Character[][] clone = cycle(current, 4);
-//            print(clone);
-
-            if (compare(clone, current)) {
-                break;
-            } else {
-                current = clone;
-            }
-        }
-
-        return countOccupied(height, wide, current);
+        return gameOfSeat(matrix, Day11::cycle);
     }
 
     public static int es2(Character[][] matrix) {
-        int height = matrix.length;
-        int wide = matrix[0].length;
+        return gameOfSeat(matrix, Day11::cycle2);
+    }
 
+    private static int gameOfSeat(Character[][] matrix, Function<Character[][], Character[][]> cycle) {
         Character[][] current = cloneMatrix(matrix);
         while (true) {
-            Character[][] clone = cycle2(current, 5);
+            Character[][] clone = cycle.apply(current);
 //            print(clone);
 
             if (compare(clone, current)) {
@@ -36,20 +26,20 @@ public class Day11 {
             }
         }
 
-        return countOccupied(height, wide, current);
+        return countOccupied(current);
     }
 
-    private static Character[][] cycle2(Character[][] matrix, int minTolerance) {
+    private static Character[][] cycle(Character[][] matrix) {
         int height = matrix.length;
         int wide = matrix[0].length;
         Character[][] clone = cloneMatrix(matrix);
         for (int x = 0; x < height; x++) {
             for (int y = 0; y < wide; y++) {
-                int occupiedNeigbours = occupiedNeigboursInLine(matrix, x, y);
-                if (matrix[x][y] == 'L' && occupiedNeigbours == 0) {
+                int occupiedNeighbors = occupiedNeighbors(matrix, Pair.of(x, y));
+                if (matrix[x][y] == 'L' && occupiedNeighbors == 0) {
                     clone[x][y] = '#';
                 }
-                if (matrix[x][y] == '#' && occupiedNeigbours >= minTolerance) {
+                if (matrix[x][y] == '#' && occupiedNeighbors >= 4) {
                     clone[x][y] = 'L';
                 }
             }
@@ -57,23 +47,41 @@ public class Day11 {
         return clone;
     }
 
-    private static int occupiedNeigboursInLine(Character[][] matrix, int x, int y) {
+    private static Character[][] cycle2(Character[][] matrix) {
+        int height = matrix.length;
+        int wide = matrix[0].length;
+        Character[][] clone = cloneMatrix(matrix);
+        for (int x = 0; x < height; x++) {
+            for (int y = 0; y < wide; y++) {
+                int occupiedNeighbors = occupiedNeighborsInLine(matrix, Pair.of(x, y));
+                if (matrix[x][y] == 'L' && occupiedNeighbors == 0) {
+                    clone[x][y] = '#';
+                }
+                if (matrix[x][y] == '#' && occupiedNeighbors >= 5) {
+                    clone[x][y] = 'L';
+                }
+            }
+        }
+        return clone;
+    }
+
+    private static int occupiedNeighborsInLine(Character[][] matrix, Pair<Integer, Integer> pos) {
         int height = matrix.length;
         int wide = matrix[0].length;
         int[] direction = new int[]{-1, 0, 1};
         int counter = 0;
-        for (int i = 0; i < direction.length; i++) {
-            for (int j = 0; j < direction.length; j++) {
-                if (direction[i] == 0 && direction[j] == 0)
+        for (int directionX : direction) {
+            for (int directionY : direction) {
+                if (directionX == 0 && directionY == 0)
                     continue;
-                if (occupiedIsSigth(matrix, direction[i], direction[j], x, y))
+                if (occupiedIsSight(matrix, directionX, directionY, pos.getLeft(), pos.getRight()))
                     counter++;
             }
         }
         return counter;
     }
 
-    private static boolean occupiedIsSigth(Character[][] matrix, int xDirection, int yDirection, int x, int y) {
+    private static boolean occupiedIsSight(Character[][] matrix, int xDirection, int yDirection, int x, int y) {
         int height = matrix.length;
         int wide = matrix[0].length;
         int currentx = x;
@@ -92,35 +100,17 @@ public class Day11 {
         }
     }
 
-    private static Character[][] cycle(Character[][] matrix, int minTolerance) {
+    private static int occupiedNeighbors(Character[][] matrix, Pair<Integer, Integer> pos) {
         int height = matrix.length;
         int wide = matrix[0].length;
-        Character[][] clone = cloneMatrix(matrix);
-        for (int x = 0; x < height; x++) {
-            for (int y = 0; y < wide; y++) {
-                int occupiedNeigbours = occupiedNeigbours(matrix, x, y);
-                if (matrix[x][y] == 'L' && occupiedNeigbours == 0) {
-                    clone[x][y] = '#';
-                }
-                if (matrix[x][y] == '#' && occupiedNeigbours >= minTolerance) {
-                    clone[x][y] = 'L';
-                }
-            }
-        }
-        return clone;
-    }
-
-    private static int occupiedNeigbours(Character[][] matrix, int x, int y) {
-        int height = matrix.length;
-        int wide = matrix[0].length;
-        int[] disp = new int[]{-1, 0, 1};
+        int[] displacement = new int[]{-1, 0, 1};
         int counter = 0;
-        for (int i = 0; i < disp.length; i++) {
-            for (int j = 0; j < disp.length; j++) {
-                if (disp[i] == 0 && disp[j] == 0)
+        for (int displacementX : displacement) {
+            for (int displacementY : displacement) {
+                if (displacementX == 0 && displacementY == 0)
                     continue;
-                int neiX = x + disp[i];
-                int neiY = y + disp[j];
+                int neiX = pos.getLeft() + displacementX;
+                int neiY = pos.getRight() + displacementY;
                 if (neiX >= 0 && neiX < height && neiY >= 0 && neiY < wide) {
                     if (matrix[neiX][neiY] == '#')
                         counter++;
@@ -137,24 +127,20 @@ public class Day11 {
         return copy;
     }
 
-    private static int countOccupied(int height, int wide, Character[][] current) {
-        int occ = 0;
-        for (int x = 0; x < height; x++) {
-            for (int y = 0; y < wide; y++) {
-                if (current[x][y] == '#')
-                    occ++;
+    private static int countOccupied(Character[][] current) {
+        int occupied = 0;
+        for (Character[] characters : current) {
+            for (Character c: characters)
+                if (c == '#')
+                    occupied++;
             }
-        }
-        return occ;
+        return occupied;
     }
 
     private static void print(Character[][] a) {
-        int height = a.length;
-        int wide = a[0].length;
-        for (int x = 0; x < height; x++) {
-            for (int y = 0; y < wide; y++) {
-                System.out.print(a[x][y]);
-            }
+        for (Character[] characters : a) {
+            for (Character c: characters)
+                System.out.print(c);
             System.out.println("");
         }
         System.out.println("__________________________________");

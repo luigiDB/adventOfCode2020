@@ -39,7 +39,7 @@ public class Day11Test {
     public void es2() {
         Character[][] input = parseMatrix(getTestInput("11"), Character.class, Character::valueOf);
         int x = Day11.es2(input);
-//        assertEquals(-1, x);
+        assertEquals(2066, x);
         System.out.println(x);
     }
 }
