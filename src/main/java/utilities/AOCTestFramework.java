@@ -31,9 +31,7 @@ public class AOCTestFramework {
         return parseInput(input, BigIntegerTransformer);
     }
 
-    public static Stream<BigInteger> parseBigInteger(Path fileName) {
-        return parseInput(fileName, BigIntegerTransformer);
-    }
+    public static Stream<BigInteger> parseBigInteger(Path fileName) { return parseInput(fileName, BigIntegerTransformer);}
 
     public static Stream<String> parseStrings(String input) {
         return parseInput(input, stringTransformer);
