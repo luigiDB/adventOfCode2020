@@ -72,24 +72,24 @@ public class Day10Test {
 
     @Test
     public void es2SimpleTest() {
-        BigInteger dpSolution = Day10.es2Dp(parseInteger(simpleInput));
-        BigInteger recursiveSolution = Day10.es2Recursive(parseInteger(simpleInput));
+        BigInteger dpSolution = Day10.es2Dp(parseBigInteger(simpleInput));
+        BigInteger recursiveSolution = Day10.es2Recursive(parseBigInteger(simpleInput));
         assertEquals(0, dpSolution.compareTo(recursiveSolution));
         assertEquals(0, BigInteger.valueOf(8).compareTo(dpSolution));
     }
 
     @Test
     public void es2MediumTest() {
-        BigInteger dpSolution = Day10.es2Dp(parseInteger(mediumInput));
-        BigInteger recursiveSolution = Day10.es2Recursive(parseInteger(mediumInput));
+        BigInteger dpSolution = Day10.es2Dp(parseBigInteger(mediumInput));
+        BigInteger recursiveSolution = Day10.es2Recursive(parseBigInteger(mediumInput));
         assertEquals(0, dpSolution.compareTo(recursiveSolution));
         assertEquals(0, BigInteger.valueOf(19208).compareTo(dpSolution));
     }
 
     @Test
     public void es2() {
-        BigInteger dpSolution = Day10.es2Dp(parseInteger(getTestInput("10")));
-        BigInteger recursiveSolution = Day10.es2Recursive(parseInteger(getTestInput("10")));
+        BigInteger dpSolution = Day10.es2Dp(parseBigInteger(getTestInput("10")));
+        BigInteger recursiveSolution = Day10.es2Recursive(parseBigInteger(getTestInput("10")));
         assertEquals(0, dpSolution.compareTo(recursiveSolution));
         assertEquals(0, dpSolution.compareTo(new BigInteger("3543369523456")));
         System.out.println(dpSolution);
