@@ -50,13 +50,17 @@ public class Day11Stream {
         return clone;
     }
 
+    private static Stream<Tuple2<Integer, Integer>> lookingDirections() {
+        return Seq.of(-1, 0, 1)
+                .crossSelfJoin()
+                .remove(Tuple.tuple(0, 0));
+    }
+
     private static long occupiedNeighbors(Character[][] matrix, Tuple2<Integer, Integer> pos) {
         int height = matrix.length;
         int wide = matrix[0].length;
 
-        return ((Stream<Tuple2<Integer, Integer>>) Seq.of(-1, 0, 1)
-                .crossSelfJoin()
-                .remove(Tuple.tuple(0, 0)))
+        return lookingDirections()
                 .map(tuple -> Tuple.tuple(pos.v1() + tuple.v1(), pos.v2() + tuple.v2()))
                 .filter(tuple -> tuple.v1() >= 0 && tuple.v1() < height && tuple.v2() >= 0 && tuple.v2() < wide)
                 .filter(tuple -> matrix[tuple.v1()][tuple.v2()] == '#')
@@ -64,29 +68,15 @@ public class Day11Stream {
     }
 
     private static long occupiedNeighborsInLine(Character[][] matrix, Tuple2<Integer, Integer> pos) {
-//        Stream<Tuple2<Integer, Integer>> directions = Seq.of(-1, 0, 1)
-//                .crossSelfJoin()
-//                .remove(Tuple.tuple(0, 0));
-//        Stream<Optional<Character>> firstInSight = directions
-//                .map(tuple -> occupationInSight(matrix, tuple, pos));
-//        return firstInSight
-//                .flatMap(Optional::stream)
-//                .filter(character -> character == '#')
-//                .count();
-        int[] direction = new int[]{-1, 0, 1};
-        int counter = 0;
-        for (int directionX : direction) {
-            for (int directionY : direction) {
-                if (directionX == 0 && directionY == 0)
-                    continue;
-                if (occupationInSight(matrix, Tuple.tuple(directionX, directionY), pos))
-                    counter++;
-            }
-        }
-        return counter;
+        Stream<Optional<Character>> firstsInSight = lookingDirections()
+                .map(tuple -> occupationInSight(matrix, tuple, pos));
+        return firstsInSight
+                .flatMap(Optional::stream)
+                .filter(character -> character == '#')
+                .count();
     }
 
-    private static boolean occupationInSight(Character[][] matrix, Tuple2<Integer, Integer> direction, Tuple2<Integer, Integer> position) {
+    private static Optional<Character> occupationInSight(Character[][] matrix, Tuple2<Integer, Integer> direction, Tuple2<Integer, Integer> position) {
         int height = matrix.length;
         int wide = matrix[0].length;
 
@@ -98,11 +88,9 @@ public class Day11Stream {
             } else
                 return Optional.empty();
         }).skip(1); //we don' want the current pos in the sequence
-        Seq<Character> characters = lineOfSight
-                .map(tuple -> matrix[tuple.v1()][tuple.v2()]);
-        Optional<Character> first = characters
+        return lineOfSight
+                .map(tuple -> matrix[tuple.v1()][tuple.v2()])
                 .findFirst(character -> character != '.');
-        return first.filter(character -> character == '#').isPresent();
     }
 
 
