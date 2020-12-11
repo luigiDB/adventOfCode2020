@@ -2,22 +2,21 @@ package exercises;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 public class Day11 {
     public static int es1(Character[][] matrix) {
-        return gameOfSeat(matrix, Day11::cycle);
+        return gameOfSeat(matrix, Day11::occupiedNeighbors, 4);
     }
 
     public static int es2(Character[][] matrix) {
-        return gameOfSeat(matrix, Day11::cycle2);
+        return gameOfSeat(matrix, Day11::occupiedNeighborsInLine, 5);
     }
 
-    private static int gameOfSeat(Character[][] matrix, Function<Character[][], Character[][]> cycle) {
+    private static int gameOfSeat(Character[][] matrix, BiFunction<Character[][], Pair<Integer, Integer>, Integer> neighborCounter, int tolerance) {
         Character[][] current = cloneMatrix(matrix);
         while (true) {
-            Character[][] clone = cycle.apply(current);
-//            print(clone);
+            Character[][] clone = cycle(current, neighborCounter, tolerance);
 
             if (compare(clone, current)) {
                 break;
@@ -29,35 +28,17 @@ public class Day11 {
         return countOccupied(current);
     }
 
-    private static Character[][] cycle(Character[][] matrix) {
+    private static Character[][] cycle(Character[][] matrix, BiFunction<Character[][], Pair<Integer, Integer>, Integer> neighborCounter, int tolerance) {
         int height = matrix.length;
         int wide = matrix[0].length;
         Character[][] clone = cloneMatrix(matrix);
         for (int x = 0; x < height; x++) {
             for (int y = 0; y < wide; y++) {
-                int occupiedNeighbors = occupiedNeighbors(matrix, Pair.of(x, y));
+                int occupiedNeighbors = neighborCounter.apply(matrix, Pair.of(x, y));
                 if (matrix[x][y] == 'L' && occupiedNeighbors == 0) {
                     clone[x][y] = '#';
                 }
-                if (matrix[x][y] == '#' && occupiedNeighbors >= 4) {
-                    clone[x][y] = 'L';
-                }
-            }
-        }
-        return clone;
-    }
-
-    private static Character[][] cycle2(Character[][] matrix) {
-        int height = matrix.length;
-        int wide = matrix[0].length;
-        Character[][] clone = cloneMatrix(matrix);
-        for (int x = 0; x < height; x++) {
-            for (int y = 0; y < wide; y++) {
-                int occupiedNeighbors = occupiedNeighborsInLine(matrix, Pair.of(x, y));
-                if (matrix[x][y] == 'L' && occupiedNeighbors == 0) {
-                    clone[x][y] = '#';
-                }
-                if (matrix[x][y] == '#' && occupiedNeighbors >= 5) {
+                if (matrix[x][y] == '#' && occupiedNeighbors >= tolerance) {
                     clone[x][y] = 'L';
                 }
             }
@@ -66,8 +47,6 @@ public class Day11 {
     }
 
     private static int occupiedNeighborsInLine(Character[][] matrix, Pair<Integer, Integer> pos) {
-        int height = matrix.length;
-        int wide = matrix[0].length;
         int[] direction = new int[]{-1, 0, 1};
         int counter = 0;
         for (int directionX : direction) {
@@ -130,20 +109,11 @@ public class Day11 {
     private static int countOccupied(Character[][] current) {
         int occupied = 0;
         for (Character[] characters : current) {
-            for (Character c: characters)
+            for (Character c : characters)
                 if (c == '#')
                     occupied++;
-            }
-        return occupied;
-    }
-
-    private static void print(Character[][] a) {
-        for (Character[] characters : a) {
-            for (Character c: characters)
-                System.out.print(c);
-            System.out.println("");
         }
-        System.out.println("__________________________________");
+        return occupied;
     }
 
     private static boolean compare(Character[][] a, Character[][] b) {
