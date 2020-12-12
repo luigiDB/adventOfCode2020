@@ -1,6 +1,7 @@
 package exercises;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.jooq.lambda.tuple.Tuple;
 
 import java.util.function.BiFunction;
 
@@ -102,6 +103,6 @@ public class Day11 {
     }
 
     private static int countOccupied(Character[][] current) {
-        return countOccurencies(current, '#');
+        return countOccurrences(current, '#');
     }
 }

@@ -96,6 +96,6 @@ public class Day11Stream {
     }
 
     private static int countOccupied(Character[][] current) {
-        return countOccurencies(current, '#');
+        return countOccurrences(current, '#');
     }
 }
