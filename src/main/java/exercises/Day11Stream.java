@@ -8,6 +8,8 @@ import org.jooq.lambda.tuple.Tuple2;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static utilities.MatrixUtils.*;
+
 public class Day11Stream {
     public static int es1(Character[][] matrix) {
         return gameOfSeat(matrix, Day11Stream::occupiedNeighbors, 4);
@@ -18,11 +20,11 @@ public class Day11Stream {
     }
 
     private static int gameOfSeat(Character[][] matrix, Function2<Character[][], Tuple2<Integer, Integer>, Long> neighborCounter, int tolerance) {
-        Character[][] current = cloneMatrix(matrix);
+        Character[][] current = cloneMatrix(matrix, Character.class);
         while (true) {
             Character[][] clone = cycle(current, neighborCounter, tolerance);
 
-            if (compare(clone, current)) {
+            if (compareMatrix(clone, current)) {
                 break;
             } else {
                 current = clone;
@@ -35,7 +37,7 @@ public class Day11Stream {
     private static Character[][] cycle(Character[][] matrix, Function2<Character[][], Tuple2<Integer, Integer>, Long> neighborCounter, int tolerance) {
         int height = matrix.length;
         int wide = matrix[0].length;
-        Character[][] clone = cloneMatrix(matrix);
+        Character[][] clone = cloneMatrix(matrix, Character.class);
         for (int x = 0; x < height; x++) {
             for (int y = 0; y < wide; y++) {
                 long occupiedNeighbors = neighborCounter.apply(matrix, Tuple.tuple(x, y));
@@ -93,33 +95,7 @@ public class Day11Stream {
                 .findFirst(character -> character != '.');
     }
 
-
-    private static Character[][] cloneMatrix(Character[][] matrix) {
-        Character[][] copy = new Character[matrix.length][];
-        for (int i = 0; i < matrix.length; i++)
-            copy[i] = matrix[i].clone();
-        return copy;
-    }
-
     private static int countOccupied(Character[][] current) {
-        int occupied = 0;
-        for (Character[] characters : current) {
-            for (Character c : characters)
-                if (c == '#')
-                    occupied++;
-        }
-        return occupied;
-    }
-
-    private static boolean compare(Character[][] a, Character[][] b) {
-        int height = a.length;
-        int wide = a[0].length;
-        for (int x = 0; x < height; x++) {
-            for (int y = 0; y < wide; y++) {
-                if (a[x][y] != b[x][y])
-                    return false;
-            }
-        }
-        return true;
+        return countOccurencies(current, '#');
     }
 }
