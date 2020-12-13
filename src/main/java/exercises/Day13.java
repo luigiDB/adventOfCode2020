@@ -38,7 +38,7 @@ public class Day13 {
         throw new UnsupportedOperationException();
     }
 
-    public static BigInteger es2(Stream<String> input) {
+    public static BigInteger es2(Stream<String> input, long multiplier) {
         List<String> collect = input.collect(Collectors.toList());
         List<Tuple2<BigInteger, BigInteger>> ferries = Seq.seq(Arrays.stream(collect.get(1).split(",")))
                 .zipWithIndex()
@@ -46,7 +46,7 @@ public class Day13 {
                 .map(ferry -> Tuple.tuple(new BigInteger(ferry.v1), BigInteger.valueOf(ferry.v2)))
                 .collect(Collectors.toList());
 
-        Optional<BigInteger> first = generateSequence(ferries.get(0).v1)
+        Optional<BigInteger> first = generateSequence(ferries.get(0).v1, multiplier)
                 .findFirst(elem -> checkIfSequenceStartingHereIsValid(ferries, elem));
 
         if(first.isPresent())
@@ -57,7 +57,7 @@ public class Day13 {
     private static boolean checkIfSequenceStartingHereIsValid(List<Tuple2<BigInteger, BigInteger>> ferries, BigInteger elem) {
         for (int i = 1; i < ferries.size(); i++) {
             Tuple2<BigInteger, BigInteger> ferry = ferries.get(i);
-            if (!contains(ferry.v1, elem.add(ferry.v2)))
+            if (elem.add(ferry.v2).mod(ferry.v1).compareTo(BigInteger.ZERO) != 0)
                 return false;
             if (i == ferries.size() - 1)
                 return true;
@@ -65,8 +65,8 @@ public class Day13 {
         throw new UnsupportedOperationException();
     }
 
-    private static Seq<BigInteger> generateSequence(BigInteger start) {
-        return Seq.iterateWhilePresent(start, current -> Optional.of(current.add(start)));
+    private static Seq<BigInteger> generateSequence(BigInteger start, long multiplier) {
+        return Seq.iterateWhilePresent(start.multiply(BigInteger.valueOf(multiplier)), current -> Optional.of(current.add(start)));
     }
 
     private static boolean contains(BigInteger start, BigInteger target) {
@@ -75,8 +75,5 @@ public class Day13 {
             current = current.add(start);
         }
         return current.compareTo(target) == 0;
-//        return Seq.iterateWhilePresent(start, current -> Optional.of(current.add(start)))
-//                .skipWhile(num -> num.compareTo(target) < 0)
-//                .contains(target);
     }
 }
