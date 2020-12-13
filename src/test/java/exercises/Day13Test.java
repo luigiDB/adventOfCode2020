@@ -62,8 +62,8 @@ public class Day13Test {
 
     @Test
     public void es2() {
-        BigInteger x = Day14.es2(parseStrings(getTestInput("13")), 1000000000000L);
-//        assertEquals(1, x);
+            BigInteger x = Day14.es2(parseStrings(getTestInput("13")), 47236766515392L);
+        assertEquals(new BigInteger("803025030761664"), x);
         System.out.println(x);
     }
 }

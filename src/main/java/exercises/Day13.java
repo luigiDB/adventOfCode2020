@@ -38,7 +38,7 @@ public class Day13 {
         throw new UnsupportedOperationException();
     }
 
-    public static BigInteger es2(Stream<String> input, long multiplier) {
+    public static BigInteger es2(Stream<String> input, long startMultiplier) {
         List<String> collect = input.collect(Collectors.toList());
         List<Tuple2<BigInteger, BigInteger>> ferries = Seq.seq(Arrays.stream(collect.get(1).split(",")))
                 .zipWithIndex()
@@ -46,18 +46,24 @@ public class Day13 {
                 .map(ferry -> Tuple.tuple(new BigInteger(ferry.v1), BigInteger.valueOf(ferry.v2)))
                 .collect(Collectors.toList());
 
-        Optional<BigInteger> first = generateSequence(ferries.get(0).v1, multiplier)
-                .findFirst(elem -> checkIfSequenceStartingHereIsValid(ferries, elem));
+        Tuple2<BigInteger, BigInteger> max = ferries.stream()
+                .max(Comparator.comparing(a -> a.v1)).get();
 
-        if(first.isPresent())
-            return first.get();
+        Optional<BigInteger> first = generateSequence(max.v1, startMultiplier)
+                .findFirst(elem -> checkIfSequenceStartingHereIsValid(ferries, elem, max.v2));
+
+        if (first.isPresent())
+            return first.get().subtract(max.v2);
         throw new UnsupportedOperationException();
     }
 
-    private static boolean checkIfSequenceStartingHereIsValid(List<Tuple2<BigInteger, BigInteger>> ferries, BigInteger elem) {
-        for (int i = 1; i < ferries.size(); i++) {
+    private static boolean checkIfSequenceStartingHereIsValid(List<Tuple2<BigInteger, BigInteger>> ferries,
+                                                              BigInteger elem,
+                                                              BigInteger pivot) {
+        for (int i = 0; i < ferries.size(); i++) {
             Tuple2<BigInteger, BigInteger> ferry = ferries.get(i);
-            if (elem.add(ferry.v2).mod(ferry.v1).compareTo(BigInteger.ZERO) != 0)
+            BigInteger displacement = pivot.subtract(ferry.v2);
+            if (elem.add(displacement).mod(ferry.v1).compareTo(BigInteger.ZERO) != 0)
                 return false;
             if (i == ferries.size() - 1)
                 return true;
@@ -65,15 +71,10 @@ public class Day13 {
         throw new UnsupportedOperationException();
     }
 
-    private static Seq<BigInteger> generateSequence(BigInteger start, long multiplier) {
-        return Seq.iterateWhilePresent(start.multiply(BigInteger.valueOf(multiplier)), current -> Optional.of(current.add(start)));
-    }
-
-    private static boolean contains(BigInteger start, BigInteger target) {
-        BigInteger current = start;
-        while (current.compareTo(target) < 0) {
-            current = current.add(start);
-        }
-        return current.compareTo(target) == 0;
+    private static Seq<BigInteger> generateSequence(BigInteger start, long startMultiplier) {
+        return Seq.iterateWhilePresent(
+                start.multiply(BigInteger.valueOf(startMultiplier)),
+                current -> Optional.of(current.add(start))
+        );
     }
 }
