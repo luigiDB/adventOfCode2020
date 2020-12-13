@@ -63,7 +63,7 @@ public class Day13 {
         for (int i = 0; i < ferries.size(); i++) {
             Tuple2<BigInteger, BigInteger> ferry = ferries.get(i);
             BigInteger displacement = pivot.subtract(ferry.v2);
-            if (elem.add(displacement).mod(ferry.v1).compareTo(BigInteger.ZERO) != 0)
+            if (elem.subtract(displacement).mod(ferry.v1).compareTo(BigInteger.ZERO) != 0)
                 return false;
             if (i == ferries.size() - 1)
                 return true;
