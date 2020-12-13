@@ -1,7 +1,6 @@
 package utilities;
 
 import org.apache.commons.lang3.SerializationUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.jooq.lambda.Seq;
 import org.jooq.lambda.tuple.Tuple;
 import org.jooq.lambda.tuple.Tuple2;
@@ -11,7 +10,6 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.ServiceLoader;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -104,6 +102,28 @@ public class MatrixUtils {
         return neighbors.stream();
     }
 
+    public static <T> Stream<Tuple2<Integer, Integer>> cardinalNeighbors(T[][] matrix, Tuple2<Integer, Integer> pos) {
+        int height = matrix.length;
+        int wide = matrix[0].length;
+        int[] directions = {-1, 0, 1, 0, -1};
+        List<Tuple2<Integer, Integer>> cardinalDirections = new ArrayList<>();
+        for (int i = 0; i < directions.length - 1; i++) {
+            cardinalDirections.add(Tuple.tuple(directions[i], directions[i + 1]));
+        }
+        Seq<Optional<Tuple2<Integer, Integer>>> tuples = Seq.seq(cardinalDirections)
+                .map(tuple -> {
+                    int neiX = pos.v1() + tuple.v1;
+                    int neiY = pos.v2() + tuple.v2;
+                    if (neiX >= 0 && neiX < height && neiY >= 0 && neiY < wide) {
+                        return Optional.of(Tuple.tuple(neiX, neiY));
+                    }
+                    return Optional.empty();
+                });
+        return tuples
+                .filter(Optional::isPresent)
+                .map(Optional::get);
+    }
+
     /**
      * Return all the elements encounterd traversing the matrix from the {@code pos} following the {@code direction}.
      * The matrix is indexed by row and after by column de facto we are inverting x and y.
@@ -124,10 +144,11 @@ public class MatrixUtils {
      *         |
      * # # # # # <- from here
      * </pre>
-     * @param matrix input matrix
-     * @param pos starting point (row-column)
+     *
+     * @param matrix           input matrix
+     * @param pos              starting point (row-column)
      * @param lookingDirection direction (row-column displacement)
-     * @param <T> the type of the matrix
+     * @param <T>              the type of the matrix
      * @return
      */
     public static <T> Stream<T> look(T[][] matrix, Tuple2<Integer, Integer> pos, Tuple2<Integer, Integer> lookingDirection) {

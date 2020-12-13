@@ -1,5 +1,10 @@
 package utilities;
 
+import org.jgrapht.Graph;
+import org.jgrapht.GraphPath;
+import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
+import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.SimpleWeightedGraph;
 import org.jooq.lambda.Seq;
 import org.jooq.lambda.tuple.Tuple;
 import org.jooq.lambda.tuple.Tuple2;
@@ -11,10 +16,12 @@ import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.*;
+import static utilities.MatrixUtils.cardinalNeighbors;
 import static utilities.MatrixUtils.intGenerator;
 
 public class MatrixUtilsTest {
@@ -133,5 +140,52 @@ public class MatrixUtilsTest {
         tests.forEach(test -> {
             assertEquals(test.v5, MatrixUtils.lookForFirstMatch(originalMatrix, test.v1, test.v2, test.v3, test.v4));
         });
+    }
+
+    @Test
+    public void graph() {
+        Integer[][] matrix = new Integer[5][5];
+        MatrixUtils.fillMatrix(matrix, intGenerator);
+
+        Graph<Tuple2<Integer, Integer>, DefaultWeightedEdge> graph = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
+
+        for (int row = 0; row < matrix.length; row++) {
+            for (int column = 0; column < matrix[0].length; column++) {
+                Tuple2<Integer, Integer> center = Tuple.tuple(row, column);
+                cardinalNeighbors(matrix, center)
+                        .forEach(neighbor -> {
+                            graph.addVertex(center);
+                            graph.addVertex(neighbor);
+                            DefaultWeightedEdge edge = graph.addEdge(center, neighbor);
+                            if (edge != null)
+                                graph.setEdgeWeight(edge, center.v1 * matrix.length + center.v2);
+                        });
+            }
+        }
+        Tuple2<Integer, Integer> startNode = Tuple.tuple(0, 0);
+        Tuple2<Integer, Integer> endNode = Tuple.tuple(1, 2);
+        assertEquals(2, graph.degreeOf(startNode));
+        assertEquals(2, graph.inDegreeOf(startNode));
+        assertEquals(2, graph.edgesOf(startNode).size());
+
+        DijkstraShortestPath<Tuple2<Integer, Integer>, DefaultWeightedEdge> shortestPath = new DijkstraShortestPath<>(graph);
+        GraphPath<Tuple2<Integer, Integer>, DefaultWeightedEdge> path = shortestPath.getPath(startNode, endNode);
+        assertTrue(path.getVertexList().containsAll(List.of(
+                Tuple.tuple(0, 0),
+                Tuple.tuple(0, 1),
+                Tuple.tuple(0, 2),
+                Tuple.tuple(1, 2)
+        )));
+        assertEquals(3.0, path.getWeight(), 0.1);
+
+        //verify that the path change with the graph
+        graph.removeEdge(startNode, Tuple.tuple(0,1));
+        path = shortestPath.getPath(startNode, endNode);
+        assertTrue(path.getVertexList().containsAll(List.of(
+                Tuple.tuple(0, 0),
+                Tuple.tuple(1, 0),
+                Tuple.tuple(1, 1),
+                Tuple.tuple(1, 2)
+        )));
     }
 }
