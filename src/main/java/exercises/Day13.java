@@ -35,7 +35,7 @@ public class Day13 {
         throw new UnsupportedOperationException();
     }
 
-    public static BigInteger es2(Stream<String> input, long startMultiplier) {
+    public static BigInteger es2(Stream<String> input) {
         List<String> collect = input.collect(Collectors.toList());
         List<Tuple2<BigInteger, BigInteger>> ferries = Seq.seq(Arrays.stream(collect.get(1).split(",")))
                 .zipWithIndex()
@@ -43,6 +43,8 @@ public class Day13 {
                 .map(ferry -> Tuple.tuple(new BigInteger(ferry.v1), BigInteger.valueOf(ferry.v2)))
                 .collect(Collectors.toList());
 
+
+        // sorting is not needed it works also with the natural order it just converge faster
         List<Tuple2<BigInteger, BigInteger>> sorted = Seq.seq(ferries)
                 .sorted(Comparator.comparing(Tuple2::v1))
                 .reverse()
@@ -77,11 +79,16 @@ public class Day13 {
         for (int i = 0; i < support.size(); i++) {
             Tuple2<BigInteger, BigInteger> ferry = support.get(i);
             if (current.add(ferry.v2).mod(ferry.v1).compareTo(BigInteger.ZERO) != 0) {
+                // In this case the current step is not a valid multiplier thus try next
                 return Tuple.tuple(Optional.empty(), increment);
             } else {
                 if (i == support.size() - 1) {
+                    // We are matching the last ferry thus we found the result we need
+                    // The result is relative to the first offset.
                     return Tuple.tuple(Optional.of(current), increment);
                 } else {
+                    // In case current is valid but it's not the last we increase the step of the current ring. This way
+                    // we found all the multiplier of the previous increment and the current.
                     Tuple2<BigInteger, BigInteger> pop = sorted.remove(0);
                     increment = increment.multiply(pop.v1);
                 }
