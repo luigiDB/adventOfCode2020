@@ -3,18 +3,24 @@ package exercises;
 import org.jooq.lambda.Seq;
 import org.jooq.lambda.tuple.Tuple;
 import org.jooq.lambda.tuple.Tuple2;
+import utilities.ChineseRemainderTheorem;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static java.util.Arrays.stream;
 
 public class Day13 {
     public static int es1(Stream<String> input) {
         List<String> collect = input.collect(Collectors.toList());
         Integer timestamp = Integer.valueOf(collect.get(0));
-        IntStream ferries = Arrays.stream(collect.get(1).split(","))
+        IntStream ferries = stream(collect.get(1).split(","))
                 .filter(c -> !c.equals("x"))
                 .mapToInt(Integer::valueOf);
 
@@ -37,7 +43,7 @@ public class Day13 {
 
     public static BigInteger es2(Stream<String> input) {
         List<String> collect = input.collect(Collectors.toList());
-        List<Tuple2<BigInteger, BigInteger>> ferries = Seq.seq(Arrays.stream(collect.get(1).split(",")))
+        List<Tuple2<BigInteger, BigInteger>> ferries = Seq.seq(stream(collect.get(1).split(",")))
                 .zipWithIndex()
                 .filter(ferry -> !ferry.v1.equals("x"))
                 .map(ferry -> Tuple.tuple(new BigInteger(ferry.v1), BigInteger.valueOf(ferry.v2)))
@@ -58,7 +64,7 @@ public class Day13 {
 
         BigInteger current = BigInteger.ZERO;
         BigInteger increment = pop.v1;
-        BigInteger solution = null;
+        BigInteger solution;
 
         while (true) {
             current = current.add(increment);
@@ -73,8 +79,8 @@ public class Day13 {
     }
 
     private static Tuple2<Optional<BigInteger>, BigInteger> checkIfCurrentIsValid(List<Tuple2<BigInteger, BigInteger>> sorted,
-                                                              BigInteger current,
-                                                              BigInteger increment) {
+                                                                                  BigInteger current,
+                                                                                  BigInteger increment) {
         List<Tuple2<BigInteger, BigInteger>> support = new ArrayList<>(sorted);
         for (int i = 0; i < support.size(); i++) {
             Tuple2<BigInteger, BigInteger> ferry = support.get(i);
@@ -96,4 +102,17 @@ public class Day13 {
         }
         return Tuple.tuple(Optional.empty(), increment);
     }
+
+    public static BigInteger es2WithChineseRemainder(Stream<String> input) {
+        List<String> collect = input.collect(Collectors.toList());
+        Seq<Tuple2<BigInteger, BigInteger>> ferries = Seq.seq(stream(collect.get(1).split(",")))
+                .zipWithIndex()
+                .filter(ferry -> !ferry.v1.equals("x"))
+                .map(ferry -> Tuple.tuple(new BigInteger(ferry.v1), BigInteger.valueOf(-ferry.v2)));
+
+        Tuple2<Seq<BigInteger>, Seq<BigInteger>> chineseInput = Seq.unzip(ferries);
+
+        return ChineseRemainderTheorem.chineseRemainder(chineseInput.v1.toArray(BigInteger[]::new), chineseInput.v2.toArray(BigInteger[]::new));
+    }
+
 }

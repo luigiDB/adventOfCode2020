@@ -2,6 +2,7 @@ package exercises;
 
 import org.junit.Assert;
 import org.junit.Test;
+import utilities.ChineseRemainderTheorem;
 
 import java.math.BigInteger;
 
@@ -62,8 +63,14 @@ public class Day13Test {
 
     @Test
     public void es2() {
-            BigInteger x = Day13.es2(parseStrings(getTestInput("13")));
+        BigInteger x = Day13.es2(parseStrings(getTestInput("13")));
         assertEquals(new BigInteger("803025030761664"), x);
         System.out.println(x);
+    }
+
+    @Test
+    public void es2WithChineseRemainder() {
+        BigInteger x = Day13.es2WithChineseRemainder(parseStrings(getTestInput("13")));
+        assertEquals(BigInteger.valueOf(803025030761664L), x);
     }
 }
