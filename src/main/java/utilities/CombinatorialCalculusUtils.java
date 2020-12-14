@@ -1,5 +1,6 @@
 package utilities;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
@@ -20,16 +21,16 @@ public class CombinatorialCalculusUtils {
      * @param <T>  The type of the list
      * @return A stream of all possible combinations
      */
-    public static <T> Stream<List<T>> combinations(List<T> list) {
+    public static <T> Stream<Set<T>> allCombinations(List<T> list) {
         final long N = (long) Math.pow(2, list.size());
         return StreamSupport
-                .stream(new Spliterators.AbstractSpliterator<List<T>>(N, SIZED) {
+                .stream(new Spliterators.AbstractSpliterator<Set<T>>(N, SIZED) {
                     long i = 1;
 
                     @Override
-                    public boolean tryAdvance(Consumer<? super List<T>> action) {
+                    public boolean tryAdvance(Consumer<? super Set<T>> action) {
                         if (i < N) {
-                            List<T> out = new ArrayList<T>(Long.bitCount(i));
+                            Set<T> out = new HashSet<>(Long.bitCount(i));
                             for (int bit = 0; bit < list.size(); bit++) {
                                 if ((i & (1L << bit)) != 0) {
                                     out.add(list.get(bit));
@@ -45,49 +46,27 @@ public class CombinatorialCalculusUtils {
                 }, false);
     }
 
-//    public static <T> Stream<List<T>> combinations(List<T> list, int len) {
-//        Set<T>
-//        Set<Set<Integer>> combinations = Sets.combinations(new HashSet<>(list), 2);
-//        final long N = (long) Math.pow(2, list.size());
-//        return StreamSupport
-//                .stream(new Spliterators.AbstractSpliterator<List<T>>(N, SIZED) {
-//                    long i = 1;
-//
-//                    @Override
-//                    public boolean tryAdvance(Consumer<? super List<T>> action) {
-//                        if (i < N) {
-//                            List<T> out = new ArrayList<T>(Long.bitCount(i));
-//                            for (int bit = 0; bit < list.size(); bit++) {
-//                                if ((i & (1L << bit)) != 0) {
-//                                    out.add(list.get(bit));
-//                                }
-//                            }
-//                            action.accept(out);
-//                            ++i;
-//                            return true;
-//                        } else {
-//                            return false;
-//                        }
-//                    }
-//                }, false);
-//    }
+    public static <T> Stream<Set<T>> combinations(List<T> list, int len) {
+        return Sets.combinations(Set.copyOf(list), len).stream();
+    }
 
-    public static <T> Stream<List<T>> permutations(List<T> list) {
-        long N = LongStream.rangeClosed(1, list.size())
+    public static <T> Stream<List<T>> permutations(List<T> originalUnmodifiableList) {
+        ArrayList<T> input = new ArrayList<>(originalUnmodifiableList);
+        long N = LongStream.rangeClosed(1, originalUnmodifiableList.size())
                 .reduce(1, (long x, long y) -> x * y);
         return Stream.concat(
-                Stream.of(new ArrayList<>(list)),
+                Stream.of(new ArrayList<>(input)),
                 StreamSupport
                         .stream(new Spliterators.AbstractSpliterator<List<T>>(N, SIZED) {
                                     int i = 0;
-                                    final int[] indexes = new int[list.size()];
+                                    final int[] indexes = new int[originalUnmodifiableList.size()];
 
                                     @Override
                                     public boolean tryAdvance(Consumer<? super List<T>> action) {
-                                        while (i < list.size()) {
+                                        while (i < originalUnmodifiableList.size()) {
                                             if (indexes[i] < i) {
-                                                swap(list, i % 2 == 0 ? 0 : indexes[i], i);
-                                                action.accept(new ArrayList<>(list));
+                                                swap(input, i % 2 == 0 ? 0 : indexes[i], i);
+                                                action.accept(new ArrayList<>(input));
                                                 indexes[i]++;
                                                 i = 0;
                                                 return true;
