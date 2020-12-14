@@ -1,34 +1,22 @@
 package exercises;
 
-import org.jgrapht.Graph;
-import org.jgrapht.GraphPath;
-import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
-import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.graph.SimpleWeightedGraph;
-import org.jooq.lambda.tuple.Tuple;
-import org.jooq.lambda.tuple.Tuple2;
 import org.junit.Assert;
 import org.junit.Test;
-import utilities.MatrixUtils;
 
 import java.math.BigInteger;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static utilities.AOCTestFramework.getTestInput;
 import static utilities.AOCTestFramework.parseStrings;
-import static utilities.MatrixUtils.cardinalNeighbors;
-import static utilities.MatrixUtils.intGenerator;
 
 public class Day14Test {
-    private String testInput = "mask = XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X\n" +
-            "mem[8] = 11\n" +
-            "mem[7] = 101\n" +
-            "mem[8] = 0";
 
     @Test
     public void es1Test() {
+        String testInput = "mask = XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X\n" +
+                "mem[8] = 11\n" +
+                "mem[7] = 101\n" +
+                "mem[8] = 0";
         Assert.assertEquals(BigInteger.valueOf(165), Day14.es1(parseStrings(testInput)));
     }
 
@@ -51,7 +39,7 @@ public class Day14Test {
     @Test
     public void es2() {
         BigInteger x = Day14.es2(parseStrings(getTestInput("14")));
-//        assertEquals(1, x);
+        assertEquals(new BigInteger("3289441921203"), x);
         System.out.println(x);
     }
 
