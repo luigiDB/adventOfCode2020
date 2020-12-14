@@ -32,6 +32,8 @@ public class MatrixUtilsTest {
     private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
+    private Tuple2<Integer, Integer> firstElem = Tuple.tuple(0, 0);
+    ;
 
     @Before
     public void setUp() {
@@ -93,7 +95,7 @@ public class MatrixUtilsTest {
     public void neighbors() {
         Seq<Tuple2<Tuple2<Integer, Integer>, Seq<Integer>>> tests =
                 Seq.of(
-                        Tuple.tuple(Tuple.tuple(0, 0), Seq.seq(IntStream.of(1, 5, 6).boxed())),
+                        Tuple.tuple(firstElem, Seq.seq(IntStream.of(1, 5, 6).boxed())),
                         Tuple.tuple(Tuple.tuple(2, 4), Seq.seq(IntStream.of(8, 9, 13, 18, 19).boxed())),
                         Tuple.tuple(Tuple.tuple(3, 1), Seq.seq(IntStream.of(10, 11, 12, 15, 17, 20, 21, 22).boxed())),
                         Tuple.tuple(Tuple.tuple(4, 4), Seq.seq(IntStream.of(18, 19, 23).boxed()))
@@ -109,7 +111,7 @@ public class MatrixUtilsTest {
     public void look() {
         Seq<Tuple3<Tuple2<Integer, Integer>, Tuple2<Integer, Integer>, Seq<Integer>>> tests =
                 Seq.of(
-                        Tuple.tuple(Tuple.tuple(0, 0), Tuple.tuple(1, 1), Seq.seq(IntStream.of(6, 12, 18, 24).boxed())),
+                        Tuple.tuple(firstElem, Tuple.tuple(1, 1), Seq.seq(IntStream.of(6, 12, 18, 24).boxed())),
                         Tuple.tuple(Tuple.tuple(2, 4), Tuple.tuple(0, -1), Seq.seq(IntStream.of(13, 12, 11, 10).boxed())),
                         Tuple.tuple(Tuple.tuple(2, 4), Tuple.tuple(-1, 0), Seq.seq(IntStream.of(9, 4).boxed()))
                 );
@@ -129,9 +131,9 @@ public class MatrixUtilsTest {
                 Boolean>> tests =
                 Seq.of(
                         // never skip check if first elem is > 15
-                        Tuple.tuple(Tuple.tuple(0, 0), Tuple.tuple(1, 1), x -> x > 15, x -> false, false),
+                        Tuple.tuple(firstElem, Tuple.tuple(1, 1), x -> x > 15, x -> false, false),
                         // never skip check if first elem is 6
-                        Tuple.tuple(Tuple.tuple(0, 0), Tuple.tuple(1, 1), x -> x == 6, x -> false, true),
+                        Tuple.tuple(firstElem, Tuple.tuple(1, 1), x -> x == 6, x -> false, true),
                         // skip odd numbers check if first non skipped elem is 12
                         Tuple.tuple(Tuple.tuple(2, 4), Tuple.tuple(0, -1), x -> x == 12, x -> x % 2 != 0, true),
                         // skip all
@@ -140,6 +142,21 @@ public class MatrixUtilsTest {
         tests.forEach(test -> {
             assertEquals(test.v5, MatrixUtils.lookForFirstMatch(originalMatrix, test.v1, test.v2, test.v3, test.v4));
         });
+    }
+
+    @Test
+    public void matrixGet() {
+        assertEquals(Integer.valueOf(0), MatrixUtils.matrixGet(originalMatrix, firstElem));
+        assertEquals(Integer.valueOf(7), MatrixUtils.matrixGet(originalMatrix, Tuple.tuple(1,2)));
+    }
+
+    @Test
+    public void matrixSet() {
+        MatrixUtils.matrixSet(originalMatrix, firstElem, 10);
+        assertEquals(Integer.valueOf(10), MatrixUtils.matrixGet(originalMatrix, firstElem));
+        Tuple2<Integer, Integer> elem = Tuple.tuple(1, 2);
+        MatrixUtils.matrixSet(originalMatrix, elem, 42);
+        assertEquals(Integer.valueOf(42), MatrixUtils.matrixGet(originalMatrix, elem));
     }
 
     @Test
@@ -162,7 +179,7 @@ public class MatrixUtilsTest {
                         });
             }
         }
-        Tuple2<Integer, Integer> startNode = Tuple.tuple(0, 0);
+        Tuple2<Integer, Integer> startNode = firstElem;
         Tuple2<Integer, Integer> endNode = Tuple.tuple(1, 2);
         assertEquals(2, graph.degreeOf(startNode));
         assertEquals(2, graph.inDegreeOf(startNode));
@@ -171,7 +188,7 @@ public class MatrixUtilsTest {
         DijkstraShortestPath<Tuple2<Integer, Integer>, DefaultWeightedEdge> shortestPath = new DijkstraShortestPath<>(graph);
         GraphPath<Tuple2<Integer, Integer>, DefaultWeightedEdge> path = shortestPath.getPath(startNode, endNode);
         assertTrue(path.getVertexList().containsAll(List.of(
-                Tuple.tuple(0, 0),
+                firstElem,
                 Tuple.tuple(0, 1),
                 Tuple.tuple(0, 2),
                 Tuple.tuple(1, 2)
@@ -179,10 +196,10 @@ public class MatrixUtilsTest {
         assertEquals(3.0, path.getWeight(), 0.1);
 
         //verify that the path change with the graph
-        graph.removeEdge(startNode, Tuple.tuple(0,1));
+        graph.removeEdge(startNode, Tuple.tuple(0, 1));
         path = shortestPath.getPath(startNode, endNode);
         assertTrue(path.getVertexList().containsAll(List.of(
-                Tuple.tuple(0, 0),
+                firstElem,
                 Tuple.tuple(1, 0),
                 Tuple.tuple(1, 1),
                 Tuple.tuple(1, 2)

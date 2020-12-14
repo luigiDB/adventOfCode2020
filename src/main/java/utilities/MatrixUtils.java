@@ -124,6 +124,14 @@ public class MatrixUtils {
                 .map(Optional::get);
     }
 
+    public static <T> T matrixGet(T[][] matrix, Tuple2<Integer, Integer> pos) {
+        return matrix[pos.v1][pos.v2];
+    }
+
+    public static <T> void matrixSet(T[][] matrix, Tuple2<Integer, Integer> pos, T elem) {
+        matrix[pos.v1][pos.v2] = elem;
+    }
+
     /**
      * Return all the elements encounterd traversing the matrix from the {@code pos} following the {@code direction}.
      * The matrix is indexed by row and after by column de facto we are inverting x and y.
