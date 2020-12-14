@@ -1,11 +1,13 @@
 package exercises;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static utilities.AOCTestFramework.getTestInput;
 import static utilities.AOCTestFramework.parseMatrix;
 
+@Ignore
 public class Day11StreamTest {
     private String testInput = "L.LL.LL.LL\n" +
             "LLLLLLL.LL\n" +
