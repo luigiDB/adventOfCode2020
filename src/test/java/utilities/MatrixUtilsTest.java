@@ -18,8 +18,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.*;
 import static utilities.MatrixUtils.cardinalNeighbors;
 import static utilities.MatrixUtils.intGenerator;
@@ -147,7 +150,7 @@ public class MatrixUtilsTest {
     @Test
     public void matrixGet() {
         assertEquals(Integer.valueOf(0), MatrixUtils.matrixGet(originalMatrix, firstElem));
-        assertEquals(Integer.valueOf(7), MatrixUtils.matrixGet(originalMatrix, Tuple.tuple(1,2)));
+        assertEquals(Integer.valueOf(7), MatrixUtils.matrixGet(originalMatrix, Tuple.tuple(1, 2)));
     }
 
     @Test
@@ -157,6 +160,16 @@ public class MatrixUtilsTest {
         Tuple2<Integer, Integer> elem = Tuple.tuple(1, 2);
         MatrixUtils.matrixSet(originalMatrix, elem, 42);
         assertEquals(Integer.valueOf(42), MatrixUtils.matrixGet(originalMatrix, elem));
+    }
+
+    @Test
+    public void searchOccurrences() {
+        MatrixUtils.matrixSet(originalMatrix, Tuple.tuple(1, 2), 10);
+        assertThat(MatrixUtils.searchOccurrences(originalMatrix, 10),
+                containsInAnyOrder(
+                        Tuple.tuple(1, 2),
+                        Tuple.tuple(2, 0)
+                ));
     }
 
     @Test
@@ -172,8 +185,9 @@ public class MatrixUtilsTest {
                 cardinalNeighbors(matrix, center)
                         .forEach(neighbor -> {
                             graph.addVertex(center);
-                            graph.addVertex(neighbor);
-                            DefaultWeightedEdge edge = graph.addEdge(center, neighbor);
+                            Tuple2<Integer, Integer> neighborCoordinate = Tuple.tuple(neighbor.v1, neighbor.v2);
+                            graph.addVertex(neighborCoordinate);
+                            DefaultWeightedEdge edge = graph.addEdge(center, neighborCoordinate);
                             if (edge != null)
                                 graph.setEdgeWeight(edge, center.v1 * matrix.length + center.v2);
                         });
@@ -204,5 +218,52 @@ public class MatrixUtilsTest {
                 Tuple.tuple(1, 1),
                 Tuple.tuple(1, 2)
         )));
+    }
+
+    @Test
+    public void lookForLastMatch() {
+        MatrixUtils.matrixSet(originalMatrix, Tuple.tuple(1, 0), 1);
+        MatrixUtils.matrixSet(originalMatrix, Tuple.tuple(2, 0), 1);
+        MatrixUtils.matrixSet(originalMatrix, Tuple.tuple(3, 0), 1);
+        assertEquals(Tuple.tuple(1, 0), MatrixUtils.lookForLastMatch(
+                originalMatrix,
+                Tuple.tuple(3, 0),
+                Tuple.tuple(-1, 0),
+                1));
+        assertEquals(Tuple.tuple(1, 0), MatrixUtils.lookForLastMatch(
+                originalMatrix,
+                Tuple.tuple(4, 0),
+                Tuple.tuple(-1, 0),
+                1));
+    }
+
+    @Test
+    public void clearDirections() {
+        assertThat( MatrixUtils.clearDirections(originalMatrix, firstElem, 5).collect(Collectors.toList()),
+                contains(
+                        Tuple.tuple(1, 0)
+                ));
+    }
+
+    @Test
+    public void lookForLastMatchList() {
+        MatrixUtils.matrixSet(originalMatrix, Tuple.tuple(1, 0), 1);
+        MatrixUtils.matrixSet(originalMatrix, Tuple.tuple(2, 0), 1);
+        MatrixUtils.matrixSet(originalMatrix, Tuple.tuple(3, 0), 1);
+        assertThat(MatrixUtils.lookWhileMatch(
+                originalMatrix, Tuple.tuple(3, 0), Tuple.tuple(-1, 0), 1),
+                contains(
+                        Tuple.tuple(3, 0),
+                        Tuple.tuple(2, 0),
+                        Tuple.tuple(1, 0)
+                ));
+        assertThat(MatrixUtils.lookWhileMatch(
+                originalMatrix, Tuple.tuple(4, 0), Tuple.tuple(-1, 0), 1),
+                contains(
+                        Tuple.tuple(4, 0),
+                        Tuple.tuple(3, 0),
+                        Tuple.tuple(2, 0),
+                        Tuple.tuple(1, 0)
+                ));
     }
 }
