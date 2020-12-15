@@ -298,63 +298,8 @@ public class MatrixUtils {
         }
     }
 
-    public static Graph<Tuple2<Integer, Integer>, DefaultWeightedEdge> formatGraph(Character[][] matrix) {
-        Tuple2<Integer, Integer> start = searchOccurrences(matrix, 'S').iterator().next();
-        matrixSet(matrix, start, ' ');
-        Tuple2<Integer, Integer> end = searchOccurrences(matrix, 'E').iterator().next();
-        matrixSet(matrix, end, ' ');
-
-        Graph<Tuple2<Integer, Integer>, DefaultWeightedEdge> graph = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
-
-        Queue<Tuple2<Tuple2<Integer, Integer>, Tuple2<Integer, Integer>>> bfsQueue = new LinkedList<>();
-        bfsQueue.add(Tuple.tuple(start, Tuple.tuple(1, 0)));
-
-        while (!bfsQueue.isEmpty()) {
-            Tuple2<Tuple2<Integer, Integer>, Tuple2<Integer, Integer>> extract = bfsQueue.poll();
-            Tuple2<Integer, Integer> poll = extract.v1;
-            Tuple2<Integer, Integer> banDirection = extract.v2;
-            graph.addVertex(poll);
-            clearDirections(matrix, poll, ' ')
-                    .filter(direction -> !direction.equals(banDirection))
-                    .forEach(direction -> {
-                        List<Tuple2<Integer, Integer>> walk = lookWhileMatch(matrix, poll, direction, ' ');
-                        walk.remove(0);
-                        int counter = 1;
-                        for (Tuple2<Integer, Integer> step : walk) {
-                            List<Tuple2<Integer, Integer>> collect = clearDirections(matrix, step, ' ').collect(Collectors.toList());
-                            if (collect.size() != 2) {
-                                addEdge(graph, poll, counter, step);
-
-                                if (collect.size() == 3 || collect.size() == 4) {
-                                    bfsQueue.add(Tuple.tuple(step, reverseDirection(direction)));
-                                }
-                            } else {
-                                Tuple2<Integer, Integer> second = collect.get(1);
-                                if (!collect.get(0).equals(reverseDirection(second))) {
-                                    addEdge(graph, poll, counter, step);
-                                    bfsQueue.add(Tuple.tuple(step, reverseDirection(direction)));
-                                }
-                            }
-                            counter++;
-                        }
-                    });
-        }
-
-        return graph;
-    }
-
-    private static Tuple2<Integer, Integer> reverseDirection(Tuple2<Integer, Integer> second) {
+    public static Tuple2<Integer, Integer> reverseDirection(Tuple2<Integer, Integer> second) {
         return Tuple.tuple(-second.v1, -second.v2);
-    }
-
-    private static void addEdge(Graph<Tuple2<Integer, Integer>, DefaultWeightedEdge> graph,
-                                Tuple2<Integer, Integer> start,
-                                int counter,
-                                Tuple2<Integer, Integer> end) {
-        graph.addVertex(end);
-        DefaultWeightedEdge edge = graph.addEdge(start, end);
-        if (edge != null)
-            graph.setEdgeWeight(edge, counter);
     }
 
 }

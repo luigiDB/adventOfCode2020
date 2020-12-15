@@ -59,7 +59,7 @@ public class MazeRunnerTest {
             "             Z       ";
 
     @Test
-    public void testMatrixToGraph() {
+    public void testMinimalMatrixToGraph() {
         String minimalMaze =
                 "#######\n" +
                 "#  ####\n" +
@@ -71,10 +71,22 @@ public class MazeRunnerTest {
         Character[][] matrix = parseMatrix(minimalMaze, Character.class, Character::valueOf);
         Tuple2<Integer, Integer> start = searchOccurrences(matrix, 'S').iterator().next();
         Tuple2<Integer, Integer> end = searchOccurrences(matrix, 'E').iterator().next();
-        Graph<Tuple2<Integer, Integer>, DefaultWeightedEdge> graph = MatrixUtils.formatGraph(matrix);
+        Graph<Tuple2<Integer, Integer>, DefaultWeightedEdge> graph = MazeRunner.formatGraph(matrix, ' ');
 
         DijkstraShortestPath<Tuple2<Integer, Integer>, DefaultWeightedEdge> shortestPath = new DijkstraShortestPath<>(graph);
         GraphPath<Tuple2<Integer, Integer>, DefaultWeightedEdge> path = shortestPath.getPath(start, end);
         assertEquals(10.0, path.getWeight(), 1);
+    }
+
+    @Test
+    public void testMatrixToGraph() {
+        Character[][] matrix = parseMatrix(maze, Character.class, Character::valueOf);
+        Tuple2<Integer, Integer> start = searchOccurrences(matrix, 'S').iterator().next();
+        Tuple2<Integer, Integer> end = searchOccurrences(matrix, 'E').iterator().next();
+        Graph<Tuple2<Integer, Integer>, DefaultWeightedEdge> graph = MazeRunner.formatGraph(matrix, ' ');
+
+        DijkstraShortestPath<Tuple2<Integer, Integer>, DefaultWeightedEdge> shortestPath = new DijkstraShortestPath<>(graph);
+        GraphPath<Tuple2<Integer, Integer>, DefaultWeightedEdge> path = shortestPath.getPath(start, end);
+        assertEquals(280.0, path.getWeight(), 1);
     }
 }
