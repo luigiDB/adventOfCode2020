@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static utilities.AOCTestFramework.parseMatrix;
+import static utilities.MatrixUtils.matrixSet;
 import static utilities.MatrixUtils.searchOccurrences;
 
 public class MazeRunnerTest {
@@ -70,8 +71,10 @@ public class MazeRunnerTest {
                 "#S#####";
         Character[][] matrix = parseMatrix(minimalMaze, Character.class, Character::valueOf);
         Tuple2<Integer, Integer> start = searchOccurrences(matrix, 'S').iterator().next();
+        matrixSet(matrix, start, ' ');
         Tuple2<Integer, Integer> end = searchOccurrences(matrix, 'E').iterator().next();
-        Graph<Tuple2<Integer, Integer>, DefaultWeightedEdge> graph = MazeRunner.formatGraph(matrix, ' ');
+        matrixSet(matrix, end, ' ');
+        Graph<Tuple2<Integer, Integer>, DefaultWeightedEdge> graph = MazeRunner.formatGraph(matrix, ' ', start);
 
         DijkstraShortestPath<Tuple2<Integer, Integer>, DefaultWeightedEdge> shortestPath = new DijkstraShortestPath<>(graph);
         GraphPath<Tuple2<Integer, Integer>, DefaultWeightedEdge> path = shortestPath.getPath(start, end);
@@ -82,8 +85,10 @@ public class MazeRunnerTest {
     public void testMatrixToGraph() {
         Character[][] matrix = parseMatrix(maze, Character.class, Character::valueOf);
         Tuple2<Integer, Integer> start = searchOccurrences(matrix, 'S').iterator().next();
+        matrixSet(matrix, start, ' ');
         Tuple2<Integer, Integer> end = searchOccurrences(matrix, 'E').iterator().next();
-        Graph<Tuple2<Integer, Integer>, DefaultWeightedEdge> graph = MazeRunner.formatGraph(matrix, ' ');
+        matrixSet(matrix, end, ' ');
+        Graph<Tuple2<Integer, Integer>, DefaultWeightedEdge> graph = MazeRunner.formatGraph(matrix, ' ', start);
 
         DijkstraShortestPath<Tuple2<Integer, Integer>, DefaultWeightedEdge> shortestPath = new DijkstraShortestPath<>(graph);
         GraphPath<Tuple2<Integer, Integer>, DefaultWeightedEdge> path = shortestPath.getPath(start, end);

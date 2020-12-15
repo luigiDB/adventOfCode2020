@@ -4,7 +4,6 @@ import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
-import org.jooq.lambda.Seq;
 import org.jooq.lambda.tuple.Tuple;
 import org.jooq.lambda.tuple.Tuple2;
 
@@ -18,11 +17,8 @@ import static utilities.MatrixUtils.*;
 public class MazeRunner {
 
 
-    public static Graph<Tuple2<Integer, Integer>, DefaultWeightedEdge> formatGraph(Character[][] matrix, Character emptyPath) {
-        Tuple2<Integer, Integer> start = searchOccurrences(matrix, 'S').iterator().next();
-        matrixSet(matrix, start, ' ');
-        Tuple2<Integer, Integer> end = searchOccurrences(matrix, 'E').iterator().next();
-        matrixSet(matrix, end, ' ');
+    public static Graph<Tuple2<Integer, Integer>, DefaultWeightedEdge> formatGraph(Character[][] matrix, Character emptyPath,
+                                                                                   Tuple2<Integer, Integer> start) {
 
         Graph<Tuple2<Integer, Integer>, DefaultWeightedEdge> graph = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
 
@@ -37,10 +33,9 @@ public class MazeRunner {
             clearDirections(matrix, currentStartingPos, ' ')
                     .filter(direction -> !direction.equals(arrivalDirection))
                     .forEach(direction -> {
-                        int counter = 1;
                         List<Tuple2<Integer, Integer>> walk = lookWhileMatch(matrix, currentStartingPos, direction, emptyPath);
-                        walk.remove(0);
-                        for (Tuple2<Integer, Integer> step : walk) {
+                        for (int counter = 1; counter < walk.size(); counter++) {
+                            Tuple2<Integer, Integer> step = walk.get(counter);
                             List<Tuple2<Integer, Integer>> possibleDirectionsFromStep = clearDirections(matrix, step, emptyPath).collect(Collectors.toList());
                             if (possibleDirectionsFromStep.size() != 2) {
                                 // step is a 3 way/4 way split or a dead end
@@ -48,7 +43,7 @@ public class MazeRunner {
 
                                 if (possibleDirectionsFromStep.size() == 3 || possibleDirectionsFromStep.size() == 4) {
                                     bfsQueue.add(Tuple.tuple(step, reverseDirection(direction)));
-                                } // else dead end
+                                } // dead end
                             } else {
                                 //corridor where angle are considered vertexes
                                 if (!possibleDirectionsFromStep.get(0).equals(reverseDirection(possibleDirectionsFromStep.get(1)))) {
@@ -56,11 +51,9 @@ public class MazeRunner {
                                     bfsQueue.add(Tuple.tuple(step, reverseDirection(direction)));
                                 }
                             }
-                            counter++;
                         }
                     });
         }
-
         return graph;
     }
 
