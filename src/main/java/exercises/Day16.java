@@ -55,6 +55,7 @@ public class Day16 {
         }
 
         while (!canTerminate(plausible)) {
+            //remove impossible labels
             for (int i = 0; i < plausible.length; i++) {
                 for (List<Long> ticket : validTickets) {
                     List<String> possible = valueInWhichRange(ranges, ticket.get(i));
@@ -62,7 +63,9 @@ public class Day16 {
                 }
             }
 
+            //cycle n times (like Bellman Ford)
             for (int cycle = 0; cycle < plausible.length; cycle++) {
+                // determine must choices
                 List<Tuple2<String, Integer>> uniqueness = new ArrayList<>();
                 for (int i = 0; i < plausible.length; i++) {
                     if (plausible[i].size() == 1) {
@@ -70,6 +73,7 @@ public class Day16 {
                     }
                 }
 
+                // remove must choices from other sets
                 for (Tuple2<String, Integer> unique : uniqueness) {
                     for (int i = 0; i < plausible.length; i++) {
                         if (i != unique.v2)
