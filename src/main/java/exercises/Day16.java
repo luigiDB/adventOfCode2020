@@ -36,7 +36,7 @@ public class Day16 {
     public static long es2(Stream<String> input) {
         List<String> setup = input.collect(Collectors.toList());
         Map<String, Tuple2<Range<Long>, Range<Long>>> ranges = parseRanges(setup.get(0));
-        List<Long> myticket = parseMyTicket(setup.get(1));
+        List<Long> myTicket = parseMyTicket(setup.get(1));
         List<List<Long>> tickets = parseTickets(setup.get(2));
 
         List<List<Long>> validTickets = tickets.stream()
@@ -48,7 +48,6 @@ public class Day16 {
                     return true;
                 }).collect(Collectors.toList());
 
-        String[] mapping = new String[ranges.size()];
         Set<String>[] plausible = new Set[ranges.size()];
         HashSet<String> originalSetOfPositions = new HashSet<>(ranges.keySet());
         for (int i = 0; i < plausible.length; i++) {
@@ -83,8 +82,8 @@ public class Day16 {
         long result = 1;
         for (int i = 0; i < plausible.length; i++) {
             String key = plausible[i].iterator().next();
-            if(key.contains("departure")) {
-                result *= myticket.get(i);
+            if (key.contains("departure")) {
+                result *= myTicket.get(i);
             }
 
         }
