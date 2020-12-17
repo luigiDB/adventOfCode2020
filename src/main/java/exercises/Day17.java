@@ -11,85 +11,85 @@ import java.util.Set;
 
 public class Day17 {
     public static long es1(Character[][] input) {
-        Set<Tuple3<Integer, Integer, Integer>> on = new HashSet<>();
+        Set<Tuple3<Integer, Integer, Integer>> active = new HashSet<>();
         for (int x = 0; x < input.length; x++) {
             for (int y = 0; y < input[0].length; y++) {
                 if (input[x][y] == '#') {
-                    on.add(Tuple.tuple(x, y, 0));
+                    active.add(Tuple.tuple(x, y, 0));
                 }
             }
         }
 
         for (int i = 0; i < 6; i++) {
-            Set<Tuple3<Integer, Integer, Integer>> newOn = new HashSet<>();
-            Set<Tuple3<Integer, Integer, Integer>> check = new HashSet<>();
+            Set<Tuple3<Integer, Integer, Integer>> newActive = new HashSet<>();
+            Set<Tuple3<Integer, Integer, Integer>> toBeChecked = new HashSet<>();
 
-            for (Tuple3<Integer, Integer, Integer> activePos : on) {
-                check.addAll(neighnprs(activePos));
+            for (Tuple3<Integer, Integer, Integer> activePos : active) {
+                toBeChecked.addAll(neighbors(activePos));
             }
 
-            for (Tuple3<Integer, Integer, Integer> pos : check) {
-                int activeNeighbors = countActiveNeighbors(on, pos);
-                if (on.contains(pos)) {
+            for (Tuple3<Integer, Integer, Integer> pos : toBeChecked) {
+                int activeNeighbors = countActiveNeighbors(active, pos);
+                if (active.contains(pos)) {
                     if (activeNeighbors == 2 || activeNeighbors == 3)
-                        newOn.add(pos);
+                        newActive.add(pos);
                 } else {
                     if (activeNeighbors == 3)
-                        newOn.add(pos);
+                        newActive.add(pos);
                 }
             }
 
-            on = newOn;
+            active = newActive;
         }
 
-        return on.size();
+        return active.size();
     }
 
     public static long es2(Character[][] input) {
-        Set<Tuple4<Integer, Integer, Integer, Integer>> on = new HashSet<>();
+        Set<Tuple4<Integer, Integer, Integer, Integer>> active = new HashSet<>();
         for (int x = 0; x < input.length; x++) {
             for (int y = 0; y < input[0].length; y++) {
                 if (input[x][y] == '#') {
-                    on.add(Tuple.tuple(x, y, 0, 0));
+                    active.add(Tuple.tuple(x, y, 0, 0));
                 }
             }
         }
 
         for (int i = 0; i < 6; i++) {
-            Set<Tuple4<Integer, Integer, Integer,  Integer>> newOn = new HashSet<>();
-            Set<Tuple4<Integer, Integer, Integer,  Integer>> check = new HashSet<>();
+            Set<Tuple4<Integer, Integer, Integer,  Integer>> newActive = new HashSet<>();
+            Set<Tuple4<Integer, Integer, Integer,  Integer>> toBeChecked = new HashSet<>();
 
-            for (Tuple4<Integer, Integer, Integer, Integer> activePos : on) {
-                check.addAll(neighnprs(activePos));
+            for (Tuple4<Integer, Integer, Integer, Integer> activePos : active) {
+                toBeChecked.addAll(neighbors(activePos));
             }
 
-            for (Tuple4<Integer, Integer, Integer,  Integer> pos : check) {
-                int activeNeighbors = countActiveNeighbors(on, pos);
-                if (on.contains(pos)) {
+            for (Tuple4<Integer, Integer, Integer,  Integer> pos : toBeChecked) {
+                int activeNeighbors = countActiveNeighbors(active, pos);
+                if (active.contains(pos)) {
                     if (activeNeighbors == 2 || activeNeighbors == 3)
-                        newOn.add(pos);
+                        newActive.add(pos);
                 } else {
                     if (activeNeighbors == 3)
-                        newOn.add(pos);
+                        newActive.add(pos);
                 }
             }
 
-            on = newOn;
+            active = newActive;
         }
 
-        return on.size();
+        return active.size();
     }
 
     private static int countActiveNeighbors(Set<Tuple3<Integer, Integer, Integer>> set, Tuple3<Integer, Integer, Integer> pos) {
         int counter = 0;
-        for (Tuple3<Integer, Integer, Integer> nei : neighnprs(pos)) {
+        for (Tuple3<Integer, Integer, Integer> nei : neighbors(pos)) {
             if (set.contains(nei))
                 counter++;
         }
         return counter;
     }
 
-    private static List<Tuple3<Integer, Integer, Integer>> neighnprs(Tuple3<Integer, Integer, Integer> pos) {
+    private static List<Tuple3<Integer, Integer, Integer>> neighbors(Tuple3<Integer, Integer, Integer> pos) {
         int[] displacement = new int[]{-1, 0, 1};
         List<Tuple3<Integer, Integer, Integer>> neighbors = new ArrayList<>();
         for (int displacementX : displacement) {
@@ -110,14 +110,14 @@ public class Day17 {
 
     private static int countActiveNeighbors(Set<Tuple4<Integer, Integer, Integer,  Integer>> set, Tuple4<Integer, Integer, Integer,  Integer> pos) {
         int counter = 0;
-        for (Tuple4<Integer, Integer, Integer,  Integer> nei : neighnprs(pos)) {
+        for (Tuple4<Integer, Integer, Integer,  Integer> nei : neighbors(pos)) {
             if (set.contains(nei))
                 counter++;
         }
         return counter;
     }
 
-    private static List<Tuple4<Integer, Integer, Integer, Integer>> neighnprs(Tuple4<Integer, Integer, Integer, Integer> pos) {
+    private static List<Tuple4<Integer, Integer, Integer, Integer>> neighbors(Tuple4<Integer, Integer, Integer, Integer> pos) {
         int[] displacement = new int[]{-1, 0, 1};
         List<Tuple4<Integer, Integer, Integer,  Integer>> neighbors = new ArrayList<>();
         for (int displacementX : displacement) {
