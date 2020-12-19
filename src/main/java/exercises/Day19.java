@@ -39,11 +39,12 @@ public class Day19 {
 
         Pattern startWith42 = Pattern.compile("^" + regex42);
         Pattern startWith31 = Pattern.compile("^" + regex31);
+        Pattern total = Pattern.compile("^" + regex42 + "*" + regex31 + "*$");
 
         int valid = 0;
-        Pattern total = Pattern.compile("^" + regex42 + "*" + regex31 + "*$");
         for (String test : list.get(1).split("\n")) {
-            if(!total.matcher(test).find())
+            Matcher matcher = total.matcher(test);
+            if(!matcher.find())
                 continue;
             Tuple2<Integer, String> tmp = countHowManyStart(test, startWith42);
             Tuple2<Integer, String> tmp2 = countHowManyStart(tmp.v2, startWith31);
@@ -56,16 +57,15 @@ public class Day19 {
 
     private static Tuple2<Integer,String> countHowManyStart(String in, Pattern pattern) {
         int count = 0;
-        String support = in;
         while (true) {
-            Matcher matcher = pattern.matcher(support);
+            Matcher matcher = pattern.matcher(in);
             if (matcher.find()) {
-                support = support.substring(matcher.end());
+                in = matcher.replaceFirst("");
                 count++;
             } else
                 break;
         }
-        return Tuple.tuple(count, support);
+        return Tuple.tuple(count, in);
     }
 
     private static String parse(Map<Integer, String> rules, int startIndex) {
