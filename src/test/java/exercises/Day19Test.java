@@ -8,23 +8,21 @@ import static utilities.AOCTestFramework.getTestInput;
 import static utilities.AOCTestFramework.parseStrings;
 
 public class Day19Test {
-    private String testInput =
-            "0: 4 1 5\n" +
-            "1: 2 3 | 3 2\n" +
-            "2: 4 4 | 5 5\n" +
-            "3: 4 5 | 5 4\n" +
-            "4: \"a\"\n" +
-            "5: \"b\"\n" +
-            "\n" +
-            "ababbb\n" +
-            "bababa\n" +
-            "abbbab\n" +
-            "aaabbb\n" +
-            "aaaabbb";
 
     @Test
     public void es1Test() {
-        Assert.assertEquals(2, Day19.es1(parseStrings(testInput, "\n\n")));
+        Assert.assertEquals(2, Day19.es1(parseStrings("0: 4 1 5\n" +
+        "1: 2 3 | 3 2\n" +
+        "2: 4 4 | 5 5\n" +
+        "3: 4 5 | 5 4\n" +
+        "4: \"a\"\n" +
+        "5: \"b\"\n" +
+        "\n" +
+        "ababbb\n" +
+        "bababa\n" +
+        "abbbab\n" +
+        "aaabbb\n" +
+        "aaaabbb", "\n\n")));
     }
 
     @Test
@@ -83,7 +81,7 @@ public class Day19Test {
                 "aaaabbaabbaaaaaaabbbabbbaaabbaabaaa\n" +
                 "babaaabbbaaabaababbaabababaaab\n" +
                 "aabbbbbaabbbaaaaaabbbbbababaaaaabbaaabba";
-//        assertEquals(3, Day19.es1(parseStrings(input, "\n\n")));
+        assertEquals(3, Day19.es1(parseStrings(input, "\n\n")));
         assertEquals(12, Day19.es2(parseStrings(input, "\n\n")));
     }
 

@@ -22,6 +22,13 @@ public class Day19 {
                 .count();
     }
 
+    /**
+     * Expanding the above by hand we can notice that
+     * rule 8 match something in the form of 42 42 42 42 ...
+     * rule 11 something in the form of 42 42 42 ... 31 31 31 with equals number of 42 and 31
+     * thus after creating the regex for 42 and 31 we simply need to count the number of sequential occurrences of 42
+     * first and 31 after if we count more occurrences of 42 and nothing more remains in the string we have a match.
+     */
     public static long es2(Stream<String> input) {
         List<String> list = input.collect(Collectors.toList());
         Map<Integer, String> sortedRules = parseRules(list);
@@ -30,21 +37,11 @@ public class Day19 {
         String regex42 = parse(sortedRules, 42);
         String regex31 = parse(sortedRules, 31);
 
-        String matches = list.get(1);
         Pattern startWith42 = Pattern.compile("^" + regex42);
         Pattern startWith31 = Pattern.compile("^" + regex31);
 
-        long count = Arrays.stream(matches.split("\n"))
-                .filter(m -> {
-                    Pattern total = Pattern.compile("^" + regex42 + "*" + regex31 + "*$");
-                    if (total.matcher(m).find()) {
-                        return true;
-                    }
-                    return false;
-                }).count();
-
         int valid = 0;
-        for (String test : matches.split("\n")) {
+        for (String test : list.get(1).split("\n")) {
             Pattern total = Pattern.compile("^" + regex42 + "*" + regex31 + "*$");
             if(!total.matcher(test).find())
                 continue;
@@ -86,15 +83,18 @@ public class Day19 {
 
         String[] ors = rule.split("\\|");
         if (ors.length == 1) {
+            // AND
             for (Integer next : parseNumbers(ors[0]))
                 recursiveParse(rules, builder, next);
         } else {
             builder.append("(");
             for (String or : ors) {
+                // OR
                 for (Integer next : parseNumbers(or))
                     recursiveParse(rules, builder, next);
                 builder.append("|");
             }
+            // remove one | too much at the end
             builder.setLength(builder.length() - 1);
             builder.append(")");
         }
