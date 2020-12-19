@@ -41,8 +41,8 @@ public class Day19 {
         Pattern startWith31 = Pattern.compile("^" + regex31);
 
         int valid = 0;
+        Pattern total = Pattern.compile("^" + regex42 + "*" + regex31 + "*$");
         for (String test : list.get(1).split("\n")) {
-            Pattern total = Pattern.compile("^" + regex42 + "*" + regex31 + "*$");
             if(!total.matcher(test).find())
                 continue;
             Tuple2<Integer, String> tmp = countHowManyStart(test, startWith42);
