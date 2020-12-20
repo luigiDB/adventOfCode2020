@@ -133,7 +133,7 @@ public class MatrixUtils {
         return tuples
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .map(tuple2 -> Tuple.tuple(tuple2.v1, tuple2.v2, matrix[tuple2.v1][tuple2.v1]));
+                .map(tuple2 -> Tuple.tuple(tuple2.v1, tuple2.v2, matrix[tuple2.v1][tuple2.v2]));
     }
 
     public static <T> Stream<Tuple2<Integer, Integer>> clearDirections(T[][] matrix, Tuple2<Integer, Integer> pos, T clearPath) {
