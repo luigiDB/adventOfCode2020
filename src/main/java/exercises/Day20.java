@@ -3,14 +3,19 @@ package exercises;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleGraph;
+import org.jooq.lambda.Seq;
 import org.jooq.lambda.tuple.Tuple;
 import org.jooq.lambda.tuple.Tuple2;
+import org.jooq.lambda.tuple.Tuple3;
+import utilities.MatrixUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static utilities.AOCTestFramework.parseMatrix;
+import static utilities.MatrixUtils.matrixGet;
+import static utilities.MatrixUtils.matrixSet;
 
 public class Day20 {
 
@@ -18,15 +23,6 @@ public class Day20 {
     public static long es1(Stream<String> input) {
         List<Tile> tiles = input.map(Tile::new).collect(Collectors.toList());
         List<Tile> originalTiles = new ArrayList<>(tiles);
-
-//        Map<String, List<String>> collect = tiles.stream()
-//                .flatMap(tile -> tile.bordersString().stream())
-//                .collect(
-//                        Collectors.groupingBy(
-//                                s -> s,
-//                                Collectors.mapping(Function.identity(), Collectors.toList())
-//                        )
-//                );
 
         Map<String, List<Tile>> borders = tiles.stream()
                 .flatMap(Tile::bordersWithTile)
@@ -74,8 +70,135 @@ public class Day20 {
         return res;
     }
 
-    public static long es2(Stream<String> input) {
+    public static long es2(Stream<String> input, int size) {
+        List<Tile> tiles = input.map(Tile::new).collect(Collectors.toList());
+        List<Tile> originalTiles = new ArrayList<>(tiles);
+
+        Map<String, List<Tile>> borders = tiles.stream()
+                .flatMap(Tile::bordersWithTile)
+                .collect(
+                        Collectors.groupingBy(
+                                tuple -> tuple.v1,
+                                Collectors.mapping(tuple -> tuple.v2, Collectors.toList())
+                        )
+                );
+
+        Queue<Tile> bfs = new LinkedList<>();
+        Tile firstTile = tiles.remove(0);
+        bfs.add(firstTile);
+        List<Tuple3<Tile, Tile, String>> junctions = new ArrayList<>();
+
+        while (!bfs.isEmpty()) {
+            Tile poll = bfs.poll();
+            for (String direction : poll.availableDirections()) {
+                if (poll.free(direction)) {
+                    List<Tile> neighbors = borders.get(direction);
+                    for (Tile neighbor : neighbors) {
+                        if (!neighbor.equals(poll) && neighbor.free(direction)) {
+                            poll.occupy(direction);
+                            neighbor.occupy(direction);
+                            bfs.add(neighbor);
+                            junctions.add(Tuple.tuple(poll, neighbor, direction));
+                        }
+                    }
+                }
+            }
+        }
+
+        Graph<Tile, DefaultEdge> g = new SimpleGraph<>(DefaultEdge.class);
+        for (Tile tile : originalTiles)
+            g.addVertex(tile);
+        for (Tuple3<Tile, Tile, String> junction : junctions)
+            g.addEdge(junction.v1, junction.v2);
+
+
+        Tile[][] sea = new Tile[size][size];
+        Set<Tile> toBeUsed = new HashSet<>(originalTiles);
+        Queue<Tuple2<Integer, Integer>> bfs2 = new LinkedList<>();
+        for (Tile tile : originalTiles) {
+            if (g.degreeOf(tile) == 2) {
+                bfs2.add(Tuple.tuple(0, 0));
+                sea[0][0] = tile;
+                toBeUsed.remove(tile);
+                break;
+            }
+        }
+
+        int counter = 0;
+        while (!bfs2.isEmpty()) {
+            Tuple2<Integer, Integer> poll = bfs2.poll();
+            List<Tuple3<Integer, Integer, Tile>> tmp = cardinalNeighbors(sea, poll, counter).collect(Collectors.toList());
+            for (Tuple3<Integer, Integer, Tile> direction : tmp) {
+                Tuple2<Integer, Integer> next = Tuple.tuple(direction.v1, direction.v2);
+
+                if(matrixGet(sea, next) != null)
+                    continue;
+
+                List<Tile> neighbors = cardinalNeighbors(sea, next)
+                        .filter(tuple -> tuple.v3 != null)
+                        .map(tuple -> tuple.v3)
+                        .collect(Collectors.toList());
+
+                HashSet<Tile> possibilities = new HashSet<>(toBeUsed);
+                for (Tile tile : neighbors) {
+                    possibilities.retainAll(connections(junctions, tile));
+                }
+                Tile used = possibilities.iterator().next();
+                matrixSet(sea, next, used);
+                toBeUsed.remove(used);
+                bfs2.add(next);
+            }
+            counter++;
+        }
+
         return 0;
+    }
+
+    private static Set<Tile> connections(List<Tuple3<Tile, Tile, String>> junctions, Tile start) {
+        Set<Tile> res = new HashSet<>();
+        for (Tuple3<Tile, Tile, String> junction : junctions) {
+            if (junction.v1.equals(start))
+                res.add(junction.v2);
+            if (junction.v2.equals(start))
+                res.add(junction.v1);
+        }
+        return res;
+    }
+
+    private static Stream<Tuple3<Integer, Integer, Tile>> cardinalNeighbors(Tile[][] matrix, Tuple2<Integer, Integer> pos, int counter) {
+        int height = matrix.length;
+        int wide = matrix[0].length;
+        List<Tuple2<Integer, Integer>> cardinalDirections = cardinalDirections(counter);
+        Seq<Optional<Tuple2<Integer, Integer>>> tuples = Seq.seq(cardinalDirections)
+                .map(tuple -> {
+                    int neiX = pos.v1() + tuple.v1;
+                    int neiY = pos.v2() + tuple.v2;
+                    if (neiX >= 0 && neiX < height && neiY >= 0 && neiY < wide) {
+                        return Optional.of(Tuple.tuple(neiX, neiY));
+                    }
+                    return Optional.empty();
+                });
+        return tuples
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(tuple2 -> Tuple.tuple(tuple2.v1, tuple2.v2, matrix[tuple2.v1][tuple2.v2]));
+    }
+
+    public static Stream<Tuple3<Integer, Integer, Tile>> cardinalNeighbors(Tile[][] matrix, Tuple2<Integer, Integer> pos) {
+        return cardinalNeighbors(matrix, pos, 1);
+    }
+
+    private static List<Tuple2<Integer, Integer>> cardinalDirections(int counter) {
+        int[] directions;
+        if (counter % 2 == 0)
+            directions = new int[]{0, 1, 0, -1, 0};
+        else
+            directions = new int[]{1, 0, -1, 0, 1};
+        List<Tuple2<Integer, Integer>> cardinalDirections = new ArrayList<>();
+        for (int i = 0; i < directions.length - 1; i++) {
+            cardinalDirections.add(Tuple.tuple(directions[i], directions[i + 1]));
+        }
+        return cardinalDirections;
     }
 
     static class Tile {
@@ -144,7 +267,14 @@ public class Day20 {
         public void occupy(String direction) {
             occupiedDirections.add(direction);
             occupiedDirections.add(new StringBuilder(direction).reverse().toString());
+        }
 
+        public Stream<String> occupiedDirections() {
+            return occupiedDirections.stream();
+        }
+
+        public boolean used(Set<String> mustBeUsed) {
+            return occupiedDirections.containsAll(mustBeUsed);
         }
     }
 }

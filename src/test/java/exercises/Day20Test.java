@@ -22,12 +22,12 @@ public class Day20Test {
 
     @Test
     public void es2Test() {
-        assertEquals(0, Day20.es2(parseStrings(testInput, "\n\n")));
+        assertEquals(273, Day20.es2(parseStrings(testInput, "\n\n"), 3));
     }
 
     @Test
     public void es2() {
-        long x = Day20.es2(parseStrings(getTestInput("20"), "\n\n"));
+        long x = Day20.es2(parseStrings(getTestInput("20"), "\n\n"), 12);
 //        assertEquals(1, x);
         System.out.println(x);
     }
