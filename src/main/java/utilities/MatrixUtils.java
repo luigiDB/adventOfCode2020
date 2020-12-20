@@ -24,7 +24,7 @@ public class MatrixUtils {
     public static <T> void printMatrix(T[][] a) {
         for (T[] row : a) {
             for (T elem : row)
-                System.out.print(elem.toString() + '\t');
+                System.out.print(elem!=null?elem.toString():"_" + '\t');
             System.out.println();
         }
         System.out.println();

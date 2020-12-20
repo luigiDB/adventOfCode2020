@@ -113,6 +113,29 @@ public class Day20 {
 
 
         Tile[][] sea = new Tile[size][size];
+        rebuildMatrix(originalTiles, junctions, g, sea);
+
+        int originalTileSize = firstTile.matrix.length;
+        int newTileSize = originalTileSize - 2;
+        Character[][] view = new Character[size * newTileSize][size * newTileSize];
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                // fill view from
+                Character[][] toBeCopied = sea[x][y].matrix;
+                for (int i = 1; i < originalTileSize - 1; i++) {
+                    for (int j = 1; j < originalTileSize - 1; j++) {
+                        view[(x * newTileSize) + i - 1][(y * newTileSize) + j - 1] = toBeCopied[i][j];
+                    }
+                }
+//                MatrixUtils.printMatrix(toBeCopied);
+//                MatrixUtils.printMatrix(view);
+            }
+        }
+
+        return 0;
+    }
+
+    private static void rebuildMatrix(List<Tile> originalTiles, List<Tuple3<Tile, Tile, String>> junctions, Graph<Tile, DefaultEdge> g, Tile[][] sea) {
         Set<Tile> toBeUsed = new HashSet<>(originalTiles);
         Queue<Tuple2<Integer, Integer>> bfs2 = new LinkedList<>();
         for (Tile tile : originalTiles) {
@@ -131,7 +154,7 @@ public class Day20 {
             for (Tuple3<Integer, Integer, Tile> direction : tmp) {
                 Tuple2<Integer, Integer> next = Tuple.tuple(direction.v1, direction.v2);
 
-                if(matrixGet(sea, next) != null)
+                if (matrixGet(sea, next) != null)
                     continue;
 
                 List<Tile> neighbors = cardinalNeighbors(sea, next)
@@ -150,8 +173,6 @@ public class Day20 {
             }
             counter++;
         }
-
-        return 0;
     }
 
     private static Set<Tile> connections(List<Tuple3<Tile, Tile, String>> junctions, Tile start) {
