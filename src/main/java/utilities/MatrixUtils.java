@@ -12,6 +12,7 @@ import org.jooq.lambda.tuple.Tuple3;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -25,6 +26,17 @@ public class MatrixUtils {
         for (T[] row : a) {
             for (T elem : row)
                 System.out.print(elem!=null?elem.toString():"_" + '\t');
+            System.out.println();
+        }
+        System.out.println();
+    }
+
+    public static <T> void printMatrix(T[][] a, Function<T, String> print) {
+        for (T[] row : a) {
+            for (T elem : row) {
+                String s = elem != null ? print.apply(elem) : "_";
+                System.out.print(s + " ");
+            }
             System.out.println();
         }
         System.out.println();

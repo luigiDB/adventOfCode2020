@@ -4,8 +4,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static utilities.AOCTestFramework.getTestInput;
-import static utilities.AOCTestFramework.parseStrings;
+import static org.junit.Assert.assertTrue;
+import static utilities.AOCTestFramework.*;
 
 public class Day20Test {
     @Test
@@ -23,6 +23,21 @@ public class Day20Test {
     @Test
     public void es2Test() {
         assertEquals(273, Day20.es2(parseStrings(testInput, "\n\n"), 3));
+    }
+
+    @Test
+    public void name() {
+        Character[][] view = parseMatrix(
+                "                   # \n" +
+                      " #    ##    ##    ###\n" +
+                      "  #  #  #  #  #  #   "
+                , Character.class, Character::charValue);
+        Character[][] mask = parseMatrix(
+                "                  # \n" +
+                      "#    ##    ##    ###\n" +
+                      " #  #  #  #  #  #   "
+                , Character.class, Character::charValue);
+        assertTrue(Day20.goodView(view, mask));
     }
 
     @Test

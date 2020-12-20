@@ -7,18 +7,51 @@ import org.jooq.lambda.Seq;
 import org.jooq.lambda.tuple.Tuple;
 import org.jooq.lambda.tuple.Tuple2;
 import org.jooq.lambda.tuple.Tuple3;
-import utilities.MatrixUtils;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static utilities.AOCTestFramework.parseMatrix;
-import static utilities.MatrixUtils.matrixGet;
-import static utilities.MatrixUtils.matrixSet;
+import static utilities.MatrixUtils.*;
 
 public class Day20 {
 
+    private static Character[][] mask = parseMatrix(
+            "                  # \n" +
+                    "#    ##    ##    ###\n" +
+                    " #  #  #  #  #  #   "
+            , Character.class, Character::charValue);
+
+    private static Character[][] master = parseMatrix(
+            ".#.#..#.##...#.##..#####\n" +
+                    "###....#.#....#..#......\n" +
+                    "##.##.###.#.#..######...\n" +
+                    "###.#####...#.#####.#..#\n" +
+                    "##.#....#.##.####...#.##\n" +
+                    "...########.#....#####.#\n" +
+                    "....#..#...##..#.#.###..\n" +
+                    ".####...#..#.....#......\n" +
+                    "#..#.##..#..###.#.##....\n" +
+                    "#.####..#.####.#.#.###..\n" +
+                    "###.#.#...#.######.#..##\n" +
+                    "#.####....##..########.#\n" +
+                    "##..##.#...#...#.#.#.#..\n" +
+                    "...#..#..#.#.##..###.###\n" +
+                    ".#.#....#.##.#...###.##.\n" +
+                    "###.#...#..#.##.######..\n" +
+                    ".#.#.###.##.##.#..#.##..\n" +
+                    ".####.###.#...###.#..#.#\n" +
+                    "..#.#..#..#.#.#.####.###\n" +
+                    "#..####...#.#.#.###.###.\n" +
+                    "#####..#####...###....##\n" +
+                    "#.##..#..#...#..####...#\n" +
+                    ".#.###..##..##..####.##.\n" +
+                    "...###...##...#...#..###",
+            Character.class, Character::charValue
+
+    );
 
     public static long es1(Stream<String> input) {
         List<Tile> tiles = input.map(Tile::new).collect(Collectors.toList());
@@ -111,31 +144,113 @@ public class Day20 {
         for (Tuple3<Tile, Tile, String> junction : junctions)
             g.addEdge(junction.v1, junction.v2);
 
+        Tile[][] sea = rebuildMatrix(originalTiles, junctions, g, size);
 
-        Tile[][] sea = new Tile[size][size];
-        rebuildMatrix(originalTiles, junctions, g, sea);
+        List<Tile[][]> seas = transform(sea, Tile.class);
+        for (Tile[][] transoformedsea : seas) {
+            int originalTileSize = firstTile.matrix.length;
+            int newTileSize = originalTileSize - 2;
 
-        int originalTileSize = firstTile.matrix.length;
-        int newTileSize = originalTileSize - 2;
-        Character[][] view = new Character[size * newTileSize][size * newTileSize];
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-                // fill view from
-                Character[][] toBeCopied = sea[x][y].matrix;
-                for (int i = 1; i < originalTileSize - 1; i++) {
-                    for (int j = 1; j < originalTileSize - 1; j++) {
-                        view[(x * newTileSize) + i - 1][(y * newTileSize) + j - 1] = toBeCopied[i][j];
-                    }
-                }
-//                MatrixUtils.printMatrix(toBeCopied);
-//                MatrixUtils.printMatrix(view);
+            Character[][] transformedView = fillView(size, transoformedsea, originalTileSize, newTileSize);
+
+            if(transoformedsea[0][0].id == 1951 && transoformedsea[0][2].id == 3079) {
+                printMatrix(transoformedsea, tile -> String.valueOf(tile.getId()));
+                printMatrix(transformedView);
             }
+
+            boolean good = goodView(transformedView, mask);
+            if (good) {
+                System.out.println("match");
+                replaceMask(transformedView, mask, 'O');
+                System.out.println(countOccurrences(transformedView, '#'));
+            }
+//            }
         }
 
         return 0;
     }
 
-    private static void rebuildMatrix(List<Tile> originalTiles, List<Tuple3<Tile, Tile, String>> junctions, Graph<Tile, DefaultEdge> g, Tile[][] sea) {
+    private static void replaceMask(Character[][] view, Character[][] mask, char replace) {
+        for (int i = 0; i <= view.length - mask.length; i++) {
+            for (int j = 0; j <= view[0].length - mask[0].length; j++) {
+                if (matchMask(view, i, j)) {
+                    replaceMask(view, i, j, replace);
+                }
+            }
+        }
+    }
+
+    private static void replaceMask(Character[][] view, int startX, int startY, char replace) {
+        for (int x = 0; x < mask.length; x++) {
+            for (int y = 0; y < mask[0].length; y++) {
+                if (mask[x][y].equals('#'))
+                    view[startX + x][startY + y] = replace;
+            }
+        }
+    }
+
+    public static boolean goodView(Character[][] view, Character[][] mask) {
+        for (int i = 0; i <= view.length - mask.length; i++) {
+            for (int j = 0; j <= view[0].length - mask[0].length; j++) {
+                if (matchMask(view, i, j))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean matchMask(Character[][] view, int startX, int startY) {
+        for (int x = 0; x < mask.length; x++) {
+            for (int y = 0; y < mask[0].length; y++) {
+                if (mask[x][y].equals('#')) {
+                    if (!view[startX + x][startY + y].equals('#'))
+                        return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static <T> List<T[][]> transform(T[][] sea, Class<T> clazz) {
+        List<T[][]> list = new ArrayList<>();
+        T[][] reference = sea;
+
+        int count = 0;
+        do {
+            list.add(reference);
+            list.add(horizzotalMirror(reference, clazz));
+            T[][] vm = verticalMirror(reference, clazz);
+            list.add(vm);
+            list.add(horizzotalMirror(vm, clazz));
+            count++;
+            reference = rotateMatrix(reference, clazz);
+        } while (count < 4);
+        return list;
+    }
+
+    private static Character[][] fillView(int size, Tile[][] sea, int originalTileSize, int newTileSize) {
+        Character[][] view = new Character[size * newTileSize][size * newTileSize];
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                // fill view from
+                try {
+                    Character[][] toBeCopied = sea[x][y].matrix;
+                    for (int i = 1; i < originalTileSize - 1; i++) {
+                        for (int j = 1; j < originalTileSize - 1; j++) {
+                            view[(x * newTileSize) + i - 1][(y * newTileSize) + j - 1] = toBeCopied[i][j];
+                        }
+                    }
+                } catch (Exception e) {
+                    throw new UnsupportedOperationException();
+                }
+                printMatrix(view);
+            }
+        }
+        return view;
+    }
+
+    private static Tile[][] rebuildMatrix(List<Tile> originalTiles, List<Tuple3<Tile, Tile, String>> junctions, Graph<Tile, DefaultEdge> g, int size) {
+        Tile[][] sea = new Tile[size][size];
         Set<Tile> toBeUsed = new HashSet<>(originalTiles);
         Queue<Tuple2<Integer, Integer>> bfs2 = new LinkedList<>();
         for (Tile tile : originalTiles) {
@@ -173,6 +288,7 @@ public class Day20 {
             }
             counter++;
         }
+        return sea;
     }
 
     private static Set<Tile> connections(List<Tuple3<Tile, Tile, String>> junctions, Tile start) {
@@ -222,12 +338,62 @@ public class Day20 {
         return cardinalDirections;
     }
 
+    public static <T> T[][] rotateMatrix(T[][] matrix, Class<T> clazz) {
+        int row = matrix.length;
+        T[][] out = cloneMatrix(matrix, clazz);
+        //first find the transpose of the matrix.
+        for (int i = 0; i < row; i++) {
+            for (int j = i; j < row; j++) {
+                T temp = out[i][j];
+                out[i][j] = out[j][i];
+                out[j][i] = temp;
+            }
+        }
+        //reverse each row
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < row / 2; j++) {
+                T temp = out[i][j];
+                out[i][j] = out[i][row - 1 - j];
+                out[i][row - 1 - j] = temp;
+            }
+        }
+        return out;
+    }
+
+    public static <T> T[][] horizzotalMirror(T[][] in, Class<T> clazz) {
+        int height = in.length;
+        int width = in[0].length;
+        T[][] out = (T[][]) Array.newInstance(clazz, height, width);
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                out[i][width - j - 1] = in[i][j];
+            }
+        }
+        return out;
+    }
+
+    public static <T> T[][] verticalMirror(T[][] in, Class<T> clazz) {
+        int height = in.length;
+        int width = in[0].length;
+        T[][] out = (T[][]) Array.newInstance(clazz, height, width);
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                out[height - i - 1][j] = in[i][j];
+            }
+        }
+        return out;
+    }
+
     static class Tile {
         final int id;
         final Character[][] matrix;
         private final ArrayList<String> occupiedDirections;
         private final List<String> availableDirections;
         private final List<String> possibleDirections;
+
+        public int getId() {
+            return id;
+        }
 
         public Tile(String tile) {
             String[] split = tile.split("\n");
