@@ -125,7 +125,7 @@ public class Day20 {
             for (int ty = 0; ty < seaSize; ty++) {
                 for (int x = 0; x < 10 - 2; x++) {
                     for (int y = 0; y < 10 - 2; y++) {
-                        view[tx * (10 - 2) + x][ty * (10 - 2) + y] = sea[tx][ty].data[x + 1][y + 1];
+                        view[tx * (10 - 2) + x][ty * (10 - 2) + y] = sea[tx][ty].matrix[x + 1][y + 1];
                     }
                 }
             }
@@ -265,55 +265,24 @@ public class Day20 {
     static class TileEs1 {
         final int id;
         final Character[][] matrix;
-        private final ArrayList<String> occupiedDirections;
+        private final List<String> edges;
         private final List<String> availableDirections;
         private final List<String> possibleDirections;
-
-        public int getId() {
-            return id;
-        }
+        private final List<String> occupiedDirections;
 
         public TileEs1(String tile) {
             String[] split = tile.split("\n");
             id = Integer.parseInt(split[0].split(" ")[1].replaceAll(":", ""));
             matrix = parseMatrix(tile.substring(tile.indexOf("\n") + 1), Character.class, Character::valueOf);
 
-            char[] up = new char[matrix.length];
-            for (int i = 0; i < matrix.length; i++) {
-                up[i] = matrix[0][i];
+            edges = new ArrayList<>();
+            for (int i = 0; i < 4; i++) {
+                edges.addAll(getEdgesAsString(i));
             }
-            String u = String.valueOf(up);
 
-            char[] right = new char[matrix.length];
-            for (int i = 0; i < matrix.length; i++) {
-                right[i] = matrix[i][matrix.length - 1];
-            }
-            String r = String.valueOf(right);
-
-            char[] down = new char[matrix.length];
-            for (int i = 0; i < matrix.length; i++) {
-                down[i] = matrix[matrix.length - 1][matrix.length - 1 - i];
-            }
-            String d = String.valueOf(down);
-
-            char[] left = new char[matrix.length];
-            for (int i = 0; i < matrix.length; i++) {
-                left[i] = matrix[matrix.length - 1 - i][0];
-            }
-            String l = String.valueOf(left);
-
-            availableDirections = new ArrayList<>();
-            availableDirections.add(u);
-            availableDirections.add(new StringBuilder(u).reverse().toString());
-            availableDirections.add(r);
-            availableDirections.add(new StringBuilder(r).reverse().toString());
-            availableDirections.add(d);
-            availableDirections.add(new StringBuilder(d).reverse().toString());
-            availableDirections.add(l);
-            availableDirections.add(new StringBuilder(l).reverse().toString());
+            availableDirections = new ArrayList<>(edges);
             possibleDirections = new ArrayList<>(availableDirections);
             occupiedDirections = new ArrayList<>();
-
         }
 
         public Stream<Tuple2<String, TileEs1>> bordersWithTile() {
@@ -334,40 +303,68 @@ public class Day20 {
             occupiedDirections.add(new StringBuilder(direction).reverse().toString());
         }
 
-        public Stream<String> occupiedDirections() {
-            return occupiedDirections.stream();
+        public List<String> getEdgesAsString(int n) {
+            int width = 10;
+            StringBuilder builder = new StringBuilder();
+
+            switch (n) {
+                case 0:
+                    for (int i = 0; i < width; i++) {
+                        builder.append(matrix[i][0]);
+                    }
+                    break;
+
+                case 1:
+                    for (int i = 0; i < width; i++) {
+                        builder.append(matrix[width - 1][i]);
+                    }
+                    break;
+
+                case 2:
+                    for (int i = 0; i < width; i++) {
+                        builder.append(matrix[i][width - 1]);
+                    }
+                    break;
+
+                case 3:
+                    for (int i = 0; i < width; i++) {
+                        builder.append(matrix[0][i]);
+                    }
+                    break;
+            }
+
+            List<String> rv = new ArrayList<>();
+            rv.add(builder.toString());
+            rv.add(builder.reverse().toString());
+
+            return rv;
         }
 
-        public boolean used(Set<String> mustBeUsed) {
-            return occupiedDirections.containsAll(mustBeUsed);
-        }
     }
 
     public static class Tile {
         public int id;
         public List<Integer> edges;
-        public Boolean[][] data;
-        private final List<Integer> availableDirections;
-        private final List<Integer> occupiedDirections;
+        public Boolean[][] matrix;
+        private final List<String> availableDirections;
+        private final List<String> possibleDirections;
+        private final List<String> occupiedDirections;
 
         public Tile(String tile) {
-            String[] lines = tile.split("\n");
-            id = toInt(lines[0].split(" ")[1].replace(":", ""));
-            int height = 10;
-            int width = 10;
-            data = new Boolean[width][height];
-            for (int y = 0; y < height; y++) {
-                String line = lines[y + 1];
-                for (int x = 0; x < width; x++) {
-                    data[x][y] = (line.charAt(x) == '#');
-                }
-            }
+            String[] split = tile.split("\n");
+            id = Integer.parseInt(split[0].split(" ")[1].replaceAll(":", ""));
+            matrix = parseMatrix(tile.substring(tile.indexOf("\n") + 1), Boolean.class, c -> c=='#');
 
             edges = new ArrayList<>();
             for (int i = 0; i < 4; i++) {
                 edges.addAll(getEdges(i));
             }
-            availableDirections = new ArrayList<>(edges);
+
+            availableDirections = new ArrayList<>();
+            for (int i = 0; i < 4; i++) {
+                availableDirections.addAll(getEdgesAsString(i));
+            }
+            possibleDirections = new ArrayList<>(availableDirections);
             occupiedDirections = new ArrayList<>();
         }
 
@@ -392,25 +389,25 @@ public class Day20 {
             switch (n) {
                 case 0:
                     for (int i = 0; i < width; i++) {
-                        d[i] = data[i][0];
+                        d[i] = matrix[i][0];
                     }
                     break;
 
                 case 1:
                     for (int i = 0; i < width; i++) {
-                        d[i] = data[width - 1][i];
+                        d[i] = matrix[width - 1][i];
                     }
                     break;
 
                 case 2:
                     for (int i = 0; i < width; i++) {
-                        d[i] = data[i][width - 1];
+                        d[i] = matrix[i][width - 1];
                     }
                     break;
 
                 case 3:
                     for (int i = 0; i < width; i++) {
-                        d[i] = data[0][i];
+                        d[i] = matrix[0][i];
                     }
                     break;
             }
@@ -430,25 +427,49 @@ public class Day20 {
             return rv;
         }
 
+        public List<String> getEdgesAsString(int n) {
+            int width = 10;
+            StringBuilder builder = new StringBuilder();
+
+            switch (n) {
+                case 0:
+                    for (int i = 0; i < width; i++) {
+                        builder.append(matrix[i][0]);
+                    }
+                    break;
+
+                case 1:
+                    for (int i = 0; i < width; i++) {
+                        builder.append(matrix[width - 1][i]);
+                    }
+                    break;
+
+                case 2:
+                    for (int i = 0; i < width; i++) {
+                        builder.append(matrix[i][width - 1]);
+                    }
+                    break;
+
+                case 3:
+                    for (int i = 0; i < width; i++) {
+                        builder.append(matrix[0][i]);
+                    }
+                    break;
+            }
+
+            List<String> rv = new ArrayList<>();
+            rv.add(builder.toString());
+            rv.add(builder.reverse().toString());
+
+            return rv;
+        }
+
         public void rotate() {
-            data = rotateMatrix(data, Boolean.class);
+            matrix = rotateMatrix(matrix, Boolean.class);
         }
 
         public void flipVertical() {
-            data = verticalMirror(data, Boolean.class);
-        }
-
-        public List<Integer> availableDirections() {
-            return availableDirections;
-        }
-
-        public boolean free(Integer direction) {
-            return !occupiedDirections.contains(direction);
-        }
-
-        public void occupy(Integer direction) {
-            occupiedDirections.add(direction);
-            occupiedDirections.add(Integer.valueOf(StringUtils.reverse(direction.toString()), 2));
+            matrix = verticalMirror(matrix, Boolean.class);
         }
     }
 
