@@ -1,64 +1,34 @@
 package exercises;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleGraph;
-import org.jooq.lambda.Seq;
 import org.jooq.lambda.tuple.Tuple;
 import org.jooq.lambda.tuple.Tuple2;
-import org.jooq.lambda.tuple.Tuple3;
 
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.apache.commons.lang3.math.NumberUtils.toInt;
 import static utilities.AOCTestFramework.parseMatrix;
-import static utilities.MatrixUtils.*;
+import static utilities.AOCTestFramework.parseStrings;
 
 public class Day20 {
 
-    private static Character[][] mask = parseMatrix(
+    public static List<String> mask = parseStrings(
             "                  # \n" +
                     "#    ##    ##    ###\n" +
-                    " #  #  #  #  #  #   "
-            , Character.class, Character::charValue);
-
-    private static Character[][] master = parseMatrix(
-            ".#.#..#.##...#.##..#####\n" +
-                    "###....#.#....#..#......\n" +
-                    "##.##.###.#.#..######...\n" +
-                    "###.#####...#.#####.#..#\n" +
-                    "##.#....#.##.####...#.##\n" +
-                    "...########.#....#####.#\n" +
-                    "....#..#...##..#.#.###..\n" +
-                    ".####...#..#.....#......\n" +
-                    "#..#.##..#..###.#.##....\n" +
-                    "#.####..#.####.#.#.###..\n" +
-                    "###.#.#...#.######.#..##\n" +
-                    "#.####....##..########.#\n" +
-                    "##..##.#...#...#.#.#.#..\n" +
-                    "...#..#..#.#.##..###.###\n" +
-                    ".#.#....#.##.#...###.##.\n" +
-                    "###.#...#..#.##.######..\n" +
-                    ".#.#.###.##.##.#..#.##..\n" +
-                    ".####.###.#...###.#..#.#\n" +
-                    "..#.#..#..#.#.#.####.###\n" +
-                    "#..####...#.#.#.###.###.\n" +
-                    "#####..#####...###....##\n" +
-                    "#.##..#..#...#..####...#\n" +
-                    ".#.###..##..##..####.##.\n" +
-                    "...###...##...#...#..###",
-            Character.class, Character::charValue
-
-    );
+                    " #  #  #  #  #  #   ").collect(Collectors.toList());
 
     public static long es1(Stream<String> input) {
-        List<Tile> tiles = input.map(Tile::new).collect(Collectors.toList());
-        List<Tile> originalTiles = new ArrayList<>(tiles);
+        List<TileEs1> tiles = input.map(TileEs1::new).collect(Collectors.toList());
+        List<TileEs1> originalTiles = new ArrayList<>(tiles);
 
-        Map<String, List<Tile>> borders = tiles.stream()
-                .flatMap(Tile::bordersWithTile)
+        Map<String, List<TileEs1>> borders = tiles.stream()
+                .flatMap(TileEs1::bordersWithTile)
                 .collect(
                         Collectors.groupingBy(
                                 tuple -> tuple.v1,
@@ -66,17 +36,17 @@ public class Day20 {
                         )
                 );
 
-        Queue<Tile> bfs = new LinkedList<>();
-        Tile firstTile = tiles.remove(0);
+        Queue<TileEs1> bfs = new LinkedList<>();
+        TileEs1 firstTile = tiles.remove(0);
         bfs.add(firstTile);
-        List<Tuple2<Tile, Tile>> junctions = new ArrayList<>();
+        List<Tuple2<TileEs1, TileEs1>> junctions = new ArrayList<>();
 
         while (!bfs.isEmpty()) {
-            Tile poll = bfs.poll();
+            TileEs1 poll = bfs.poll();
             for (String direction : poll.availableDirections()) {
                 if (poll.free(direction)) {
-                    List<Tile> neighbors = borders.get(direction);
-                    for (Tile neighbor : neighbors) {
+                    List<TileEs1> neighbors = borders.get(direction);
+                    for (TileEs1 neighbor : neighbors) {
                         if (!neighbor.equals(poll) && neighbor.free(direction)) {
                             poll.occupy(direction);
                             neighbor.occupy(direction);
@@ -88,303 +58,211 @@ public class Day20 {
             }
         }
 
-        Graph<Tile, DefaultEdge> g = new SimpleGraph<>(DefaultEdge.class);
-        for (Tile tile : originalTiles)
+        Graph<TileEs1, DefaultEdge> g = new SimpleGraph<>(DefaultEdge.class);
+        for (TileEs1 tile : originalTiles)
             g.addVertex(tile);
-        for (Tuple2<Tile, Tile> junction : junctions)
+        for (Tuple2<TileEs1, TileEs1> junction : junctions)
             g.addEdge(junction.v1, junction.v2);
 
         long res = 1;
-        for (Tile tile : originalTiles) {
+        for (TileEs1 tile : originalTiles) {
             if (g.degreeOf(tile) == 2)
                 res *= tile.id;
         }
 
         return res;
+
     }
 
-    public static long es2(Stream<String> input, int size) {
-        List<Tile> tiles = input.map(Tile::new).collect(Collectors.toList());
-        List<Tile> originalTiles = new ArrayList<>(tiles);
+    public static long es2(Stream<String> input) {
+        List<Tile> tiles = input
+                .map(Tile::new)
+                .collect(Collectors.toList());
 
-        Map<String, List<Tile>> borders = tiles.stream()
-                .flatMap(Tile::bordersWithTile)
-                .collect(
-                        Collectors.groupingBy(
-                                tuple -> tuple.v1,
-                                Collectors.mapping(tuple -> tuple.v2, Collectors.toList())
-                        )
-                );
+        Map<Integer, Integer> edgesOccurrences = new HashMap<>();
+        for (Tile t : tiles) {
+            for (Integer i : t.edges) {
+                edgesOccurrences.merge(i, 1, Integer::sum);
+            }
+        }
 
-        Queue<Tile> bfs = new LinkedList<>();
-        Tile firstTile = tiles.remove(0);
-        bfs.add(firstTile);
-        List<Tuple3<Tile, Tile, String>> junctions = new ArrayList<>();
+        int seaSize = (int) Math.sqrt(tiles.size());
+        Tile[][] sea = new Tile[seaSize][seaSize];
 
-        while (!bfs.isEmpty()) {
-            Tile poll = bfs.poll();
-            for (String direction : poll.availableDirections()) {
-                if (poll.free(direction)) {
-                    List<Tile> neighbors = borders.get(direction);
-                    for (Tile neighbor : neighbors) {
-                        if (!neighbor.equals(poll) && neighbor.free(direction)) {
-                            poll.occupy(direction);
-                            neighbor.occupy(direction);
-                            bfs.add(neighbor);
-                            junctions.add(Tuple.tuple(poll, neighbor, direction));
-                        }
+        setFirstEdge(tiles, edgesOccurrences, sea);
+
+
+        fillFirstLine(tiles, seaSize, sea);
+        fillSea(tiles, seaSize, sea);
+
+        int viewSize = seaSize * (10 - 2);
+        boolean[][] support = new boolean[viewSize][viewSize];
+
+        Boolean[][] view = fillView(seaSize, sea, viewSize);
+
+        int ans = 0;
+        for (int i = 0; i < 4; i++) {
+            int count = findMonster(view, support);
+            int oddities = countOddities(view, support);
+            if (count > 0)
+                ans = oddities;
+            view = rotateMatrix(view, Boolean.class);
+        }
+        view = verticalMirror(view, Boolean.class);
+        for (int i = 0; i < 4; i++) {
+            int count = findMonster(view, support);
+            int gm = countOddities(view, support);
+            if (count > 0)
+                ans = gm;
+            view = rotateMatrix(view, Boolean.class);
+        }
+        return ans;
+    }
+
+    private static Boolean[][] fillView(int seaSize, Tile[][] sea, int viewSize) {
+        Boolean[][] view = new Boolean[viewSize][viewSize];
+        for (int tx = 0; tx < seaSize; tx++) {
+            for (int ty = 0; ty < seaSize; ty++) {
+                for (int x = 0; x < 10 - 2; x++) {
+                    for (int y = 0; y < 10 - 2; y++) {
+                        view[tx * (10 - 2) + x][ty * (10 - 2) + y] = sea[tx][ty].data[x + 1][y + 1];
                     }
                 }
-            }
-        }
-
-        Graph<Tile, DefaultEdge> g = new SimpleGraph<>(DefaultEdge.class);
-        for (Tile tile : originalTiles)
-            g.addVertex(tile);
-        for (Tuple3<Tile, Tile, String> junction : junctions)
-            g.addEdge(junction.v1, junction.v2);
-
-        Tile[][] sea = rebuildMatrix(originalTiles, junctions, g, size);
-
-        List<Tile[][]> seas = transform(sea, Tile.class);
-        for (Tile[][] transoformedsea : seas) {
-            int originalTileSize = firstTile.matrix.length;
-            int newTileSize = originalTileSize - 2;
-
-            Character[][] transformedView = fillView(size, transoformedsea, originalTileSize, newTileSize);
-
-            if(transoformedsea[0][0].id == 1951 && transoformedsea[0][2].id == 3079) {
-                printMatrix(transoformedsea, tile -> String.valueOf(tile.getId()));
-                printMatrix(transformedView);
-            }
-
-            boolean good = goodView(transformedView, mask);
-            if (good) {
-                System.out.println("match");
-                replaceMask(transformedView, mask, 'O');
-                System.out.println(countOccurrences(transformedView, '#'));
-            }
-//            }
-        }
-
-        return 0;
-    }
-
-    private static void replaceMask(Character[][] view, Character[][] mask, char replace) {
-        for (int i = 0; i <= view.length - mask.length; i++) {
-            for (int j = 0; j <= view[0].length - mask[0].length; j++) {
-                if (matchMask(view, i, j)) {
-                    replaceMask(view, i, j, replace);
-                }
-            }
-        }
-    }
-
-    private static void replaceMask(Character[][] view, int startX, int startY, char replace) {
-        for (int x = 0; x < mask.length; x++) {
-            for (int y = 0; y < mask[0].length; y++) {
-                if (mask[x][y].equals('#'))
-                    view[startX + x][startY + y] = replace;
-            }
-        }
-    }
-
-    public static boolean goodView(Character[][] view, Character[][] mask) {
-        for (int i = 0; i <= view.length - mask.length; i++) {
-            for (int j = 0; j <= view[0].length - mask[0].length; j++) {
-                if (matchMask(view, i, j))
-                    return true;
-            }
-        }
-        return false;
-    }
-
-    public static boolean matchMask(Character[][] view, int startX, int startY) {
-        for (int x = 0; x < mask.length; x++) {
-            for (int y = 0; y < mask[0].length; y++) {
-                if (mask[x][y].equals('#')) {
-                    if (!view[startX + x][startY + y].equals('#'))
-                        return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    private static <T> List<T[][]> transform(T[][] sea, Class<T> clazz) {
-        List<T[][]> list = new ArrayList<>();
-        T[][] reference = sea;
-
-        int count = 0;
-        do {
-            list.add(reference);
-            list.add(horizzotalMirror(reference, clazz));
-            T[][] vm = verticalMirror(reference, clazz);
-            list.add(vm);
-            list.add(horizzotalMirror(vm, clazz));
-            count++;
-            reference = rotateMatrix(reference, clazz);
-        } while (count < 4);
-        return list;
-    }
-
-    private static Character[][] fillView(int size, Tile[][] sea, int originalTileSize, int newTileSize) {
-        Character[][] view = new Character[size * newTileSize][size * newTileSize];
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-                // fill view from
-                try {
-                    Character[][] toBeCopied = sea[x][y].matrix;
-                    for (int i = 1; i < originalTileSize - 1; i++) {
-                        for (int j = 1; j < originalTileSize - 1; j++) {
-                            view[(x * newTileSize) + i - 1][(y * newTileSize) + j - 1] = toBeCopied[i][j];
-                        }
-                    }
-                } catch (Exception e) {
-                    throw new UnsupportedOperationException();
-                }
-                printMatrix(view);
             }
         }
         return view;
     }
 
-    private static Tile[][] rebuildMatrix(List<Tile> originalTiles, List<Tuple3<Tile, Tile, String>> junctions, Graph<Tile, DefaultEdge> g, int size) {
-        Tile[][] sea = new Tile[size][size];
-        Set<Tile> toBeUsed = new HashSet<>(originalTiles);
-        Queue<Tuple2<Integer, Integer>> bfs2 = new LinkedList<>();
-        for (Tile tile : originalTiles) {
-            if (g.degreeOf(tile) == 2) {
-                bfs2.add(Tuple.tuple(0, 0));
-                sea[0][0] = tile;
-                toBeUsed.remove(tile);
-                break;
-            }
-        }
+    private static void fillSea(List<Tile> tiles, int seaSize, Tile[][] sea) {
+        for (int y = 0; y < seaSize; y++) {
+            for (int x = 1; x < seaSize; x++) {
+                int tgt = sea[x - 1][y].getEdgeVal(1);
+                for (Tile t : tiles) {
+                    if (t.edges.contains(tgt)) {
+                        for (int i = 0; i < 3; i++) {
+                            if (t.getEdgeVal(3) == tgt) {
+                                break;
+                            }
+                            t.rotate();
+                        }
+                        if (t.getEdgeVal(3) != tgt) {
+                            t.flipVertical();
+                        }
+                        for (int i = 0; i < 3; i++) {
+                            if (t.getEdgeVal(3) == tgt) {
+                                break;
+                            }
+                            t.rotate();
+                        }
 
-        int counter = 0;
-        while (!bfs2.isEmpty()) {
-            Tuple2<Integer, Integer> poll = bfs2.poll();
-            List<Tuple3<Integer, Integer, Tile>> tmp = cardinalNeighbors(sea, poll, counter).collect(Collectors.toList());
-            for (Tuple3<Integer, Integer, Tile> direction : tmp) {
-                Tuple2<Integer, Integer> next = Tuple.tuple(direction.v1, direction.v2);
-
-                if (matrixGet(sea, next) != null)
-                    continue;
-
-                List<Tile> neighbors = cardinalNeighbors(sea, next)
-                        .filter(tuple -> tuple.v3 != null)
-                        .map(tuple -> tuple.v3)
-                        .collect(Collectors.toList());
-
-                HashSet<Tile> possibilities = new HashSet<>(toBeUsed);
-                for (Tile tile : neighbors) {
-                    possibilities.retainAll(connections(junctions, tile));
-                }
-                Tile used = possibilities.iterator().next();
-                matrixSet(sea, next, used);
-                toBeUsed.remove(used);
-                bfs2.add(next);
-            }
-            counter++;
-        }
-        return sea;
-    }
-
-    private static Set<Tile> connections(List<Tuple3<Tile, Tile, String>> junctions, Tile start) {
-        Set<Tile> res = new HashSet<>();
-        for (Tuple3<Tile, Tile, String> junction : junctions) {
-            if (junction.v1.equals(start))
-                res.add(junction.v2);
-            if (junction.v2.equals(start))
-                res.add(junction.v1);
-        }
-        return res;
-    }
-
-    private static Stream<Tuple3<Integer, Integer, Tile>> cardinalNeighbors(Tile[][] matrix, Tuple2<Integer, Integer> pos, int counter) {
-        int height = matrix.length;
-        int wide = matrix[0].length;
-        List<Tuple2<Integer, Integer>> cardinalDirections = cardinalDirections(counter);
-        Seq<Optional<Tuple2<Integer, Integer>>> tuples = Seq.seq(cardinalDirections)
-                .map(tuple -> {
-                    int neiX = pos.v1() + tuple.v1;
-                    int neiY = pos.v2() + tuple.v2;
-                    if (neiX >= 0 && neiX < height && neiY >= 0 && neiY < wide) {
-                        return Optional.of(Tuple.tuple(neiX, neiY));
+                        sea[x][y] = t;
+                        tiles.remove(t);
+                        break;
                     }
-                    return Optional.empty();
-                });
-        return tuples
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(tuple2 -> Tuple.tuple(tuple2.v1, tuple2.v2, matrix[tuple2.v1][tuple2.v2]));
-    }
-
-    public static Stream<Tuple3<Integer, Integer, Tile>> cardinalNeighbors(Tile[][] matrix, Tuple2<Integer, Integer> pos) {
-        return cardinalNeighbors(matrix, pos, 1);
-    }
-
-    private static List<Tuple2<Integer, Integer>> cardinalDirections(int counter) {
-        int[] directions;
-        if (counter % 2 == 0)
-            directions = new int[]{0, 1, 0, -1, 0};
-        else
-            directions = new int[]{1, 0, -1, 0, 1};
-        List<Tuple2<Integer, Integer>> cardinalDirections = new ArrayList<>();
-        for (int i = 0; i < directions.length - 1; i++) {
-            cardinalDirections.add(Tuple.tuple(directions[i], directions[i + 1]));
-        }
-        return cardinalDirections;
-    }
-
-    public static <T> T[][] rotateMatrix(T[][] matrix, Class<T> clazz) {
-        int row = matrix.length;
-        T[][] out = cloneMatrix(matrix, clazz);
-        //first find the transpose of the matrix.
-        for (int i = 0; i < row; i++) {
-            for (int j = i; j < row; j++) {
-                T temp = out[i][j];
-                out[i][j] = out[j][i];
-                out[j][i] = temp;
+                }
             }
         }
-        //reverse each row
-        for (int i = 0; i < row; i++) {
-            for (int j = 0; j < row / 2; j++) {
-                T temp = out[i][j];
-                out[i][j] = out[i][row - 1 - j];
-                out[i][row - 1 - j] = temp;
-            }
-        }
-        return out;
     }
 
-    public static <T> T[][] horizzotalMirror(T[][] in, Class<T> clazz) {
-        int height = in.length;
-        int width = in[0].length;
-        T[][] out = (T[][]) Array.newInstance(clazz, height, width);
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                out[i][width - j - 1] = in[i][j];
+    private static void fillFirstLine(List<Tile> tiles, int seaSize, Tile[][] sea) {
+        for (int y = 1; y < seaSize; y++) {
+            int tgt = sea[0][y - 1].getEdgeVal(2);
+            for (Tile t : tiles) {
+                if (t.edges.contains(tgt)) {
+                    for (int i = 0; i < 3; i++) {
+                        if (t.getEdgeVal(0) == tgt) {
+                            break;
+                        }
+                        t.rotate();
+                    }
+                    if (t.getEdgeVal(0) != tgt) {
+                        t.flipVertical();
+                    }
+                    for (int i = 0; i < 3; i++) {
+                        if (t.getEdgeVal(0) == tgt) {
+                            break;
+                        }
+                        t.rotate();
+                    }
+
+                    sea[0][y] = t;
+                    tiles.remove(t);
+                    break;
+                }
             }
         }
-        return out;
     }
 
-    public static <T> T[][] verticalMirror(T[][] in, Class<T> clazz) {
-        int height = in.length;
-        int width = in[0].length;
-        T[][] out = (T[][]) Array.newInstance(clazz, height, width);
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                out[height - i - 1][j] = in[i][j];
+    private static void setFirstEdge(List<Tile> tiles, Map<Integer, Integer> edgesOccurrences, Tile[][] sea) {
+        for (Tile t : tiles) {
+            if (!t.isCorner(edgesOccurrences)) {
+                continue;
+            }
+
+            while (edgesOccurrences.get(t.getEdgeVal(3)) != 1) {
+                t.rotate();
+            }
+            if (edgesOccurrences.get(t.getEdgeVal(0)) != 1) {
+                t.flipVertical();
+            }
+
+            sea[0][0] = t;
+            tiles.remove(t);
+            break;
+        }
+    }
+
+    public static int countOddities(Boolean[][] grid, boolean[][] usedGrid) {
+        int width = grid.length;
+        int cnt = 0;
+        for (int y = 0; y < width; y++) {
+            for (int x = 0; x < width; x++) {
+                if (grid[x][y] && !usedGrid[x][y]) {
+                    cnt++;
+                }
             }
         }
-        return out;
+        return cnt;
     }
 
-    static class Tile {
+    private static int findMonster(Boolean[][] grid, boolean[][] viewMaybe) {
+        int monsterWidth = mask.get(0).length();
+        int monsterHeight = mask.size();
+        int count = 0;
+        int width = grid.length;
+        for (int y = 0; y < width - (monsterHeight - 1); y++) {
+            outer:
+            for (int x = 0; x < width - (monsterWidth - 1); x++) {
+                for (int ny = 0; ny < monsterHeight; ny++) {
+                    String nline = mask.get(ny);
+                    for (int nx = 0; nx < monsterWidth; nx++) {
+                        if (nline.charAt(nx) != '#') {
+                            continue;
+                        }
+
+                        if (!grid[x + nx][y + ny]) {
+                            continue outer;
+                        }
+                    }
+                }
+                count++;
+
+                for (int ny = 0; ny < monsterHeight; ny++) {
+                    String nline = mask.get(ny);
+                    for (int nx = 0; nx < monsterWidth; nx++) {
+                        if (nline.charAt(nx) != '#') {
+                            continue;
+                        }
+                        viewMaybe[x + nx][y + ny] = true;
+                    }
+                }
+            }
+        }
+
+        return count;
+    }
+
+    static class TileEs1 {
         final int id;
         final Character[][] matrix;
         private final ArrayList<String> occupiedDirections;
@@ -395,7 +273,7 @@ public class Day20 {
             return id;
         }
 
-        public Tile(String tile) {
+        public TileEs1(String tile) {
             String[] split = tile.split("\n");
             id = Integer.parseInt(split[0].split(" ")[1].replaceAll(":", ""));
             matrix = parseMatrix(tile.substring(tile.indexOf("\n") + 1), Character.class, Character::valueOf);
@@ -438,7 +316,7 @@ public class Day20 {
 
         }
 
-        public Stream<Tuple2<String, Tile>> bordersWithTile() {
+        public Stream<Tuple2<String, TileEs1>> bordersWithTile() {
             return possibleDirections.stream()
                     .map(s -> Tuple.tuple(s, this));
         }
@@ -463,5 +341,136 @@ public class Day20 {
         public boolean used(Set<String> mustBeUsed) {
             return occupiedDirections.containsAll(mustBeUsed);
         }
+    }
+
+    public static class Tile {
+        public int id;
+        public List<Integer> edges;
+        public Boolean[][] data;
+        private final List<Integer> availableDirections;
+        private final List<Integer> occupiedDirections;
+
+        public Tile(String tile) {
+            String[] lines = tile.split("\n");
+            id = toInt(lines[0].split(" ")[1].replace(":", ""));
+            int height = 10;
+            int width = 10;
+            data = new Boolean[width][height];
+            for (int y = 0; y < height; y++) {
+                String line = lines[y + 1];
+                for (int x = 0; x < width; x++) {
+                    data[x][y] = (line.charAt(x) == '#');
+                }
+            }
+
+            edges = new ArrayList<>();
+            for (int i = 0; i < 4; i++) {
+                edges.addAll(getEdges(i));
+            }
+            availableDirections = new ArrayList<>(edges);
+            occupiedDirections = new ArrayList<>();
+        }
+
+        public boolean isCorner(Map<Integer, Integer> edgesOccurrences) {
+            int cnt = 0;
+            for (Integer i : edges) {
+                if (edgesOccurrences.get(i).equals(1)) {
+                    cnt++;
+                }
+            }
+            return (cnt > 2);
+        }
+
+        public int getEdgeVal(int n) {
+            return getEdges(n).get(0);
+        }
+
+        public List<Integer> getEdges(int n) {
+            int width = 10;
+            boolean[] d = new boolean[width];
+
+            switch (n) {
+                case 0:
+                    for (int i = 0; i < width; i++) {
+                        d[i] = data[i][0];
+                    }
+                    break;
+
+                case 1:
+                    for (int i = 0; i < width; i++) {
+                        d[i] = data[width - 1][i];
+                    }
+                    break;
+
+                case 2:
+                    for (int i = 0; i < width; i++) {
+                        d[i] = data[i][width - 1];
+                    }
+                    break;
+
+                case 3:
+                    for (int i = 0; i < width; i++) {
+                        d[i] = data[0][i];
+                    }
+                    break;
+            }
+
+            StringBuilder str = new StringBuilder();
+            for (boolean b : d) {
+                if (b)
+                    str.append("1");
+                else
+                    str.append("0");
+            }
+
+            List<Integer> rv = new ArrayList<>();
+            rv.add(Integer.valueOf(str.toString(), 2));
+            rv.add(Integer.valueOf(StringUtils.reverse(str.toString()), 2));
+
+            return rv;
+        }
+
+        public void rotate() {
+            data = rotateMatrix(data, Boolean.class);
+        }
+
+        public void flipVertical() {
+            data = verticalMirror(data, Boolean.class);
+        }
+
+        public List<Integer> availableDirections() {
+            return availableDirections;
+        }
+
+        public boolean free(Integer direction) {
+            return !occupiedDirections.contains(direction);
+        }
+
+        public void occupy(Integer direction) {
+            occupiedDirections.add(direction);
+            occupiedDirections.add(Integer.valueOf(StringUtils.reverse(direction.toString()), 2));
+        }
+    }
+
+    public static <T> T[][] verticalMirror(T[][] grid, Class<T> clazz) {
+        int width = grid.length;
+        T[][] newData = (T[][]) Array.newInstance(clazz, width, width);
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < width; j++) {
+                newData[i][j] = grid[i][width - 1 - j];
+            }
+        }
+        return newData;
+    }
+
+    public static <T> T[][] rotateMatrix(T[][] grid, Class<T> clazz) {
+        int width = grid.length;
+        T[][] newData = (T[][]) Array.newInstance(clazz, width, width);
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < width; j++) {
+                newData[i][j] = grid[width - 1 - j][i];
+            }
+        }
+        return newData;
     }
 }

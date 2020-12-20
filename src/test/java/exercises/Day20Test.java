@@ -22,28 +22,13 @@ public class Day20Test {
 
     @Test
     public void es2Test() {
-        assertEquals(273, Day20.es2(parseStrings(testInput, "\n\n"), 3));
-    }
-
-    @Test
-    public void name() {
-        Character[][] view = parseMatrix(
-                "                   # \n" +
-                      " #    ##    ##    ###\n" +
-                      "  #  #  #  #  #  #   "
-                , Character.class, Character::charValue);
-        Character[][] mask = parseMatrix(
-                "                  # \n" +
-                      "#    ##    ##    ###\n" +
-                      " #  #  #  #  #  #   "
-                , Character.class, Character::charValue);
-        assertTrue(Day20.goodView(view, mask));
+        assertEquals(273, Day20.es2(parseStrings(testInput, "\n\n")));
     }
 
     @Test
     public void es2() {
-        long x = Day20.es2(parseStrings(getTestInput("20"), "\n\n"), 12);
-//        assertEquals(1, x);
+        long x = Day20.es2(parseStrings(getTestInput("20"), "\n\n"));
+        assertEquals(2453, x);
         System.out.println(x);
     }
 
