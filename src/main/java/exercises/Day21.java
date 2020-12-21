@@ -9,57 +9,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Day21 {
-    public static long es1(Stream<String> input) {
-        List<Tuple2<List<String>, List<String>>> collect = input
-                .map(s -> {
-                    String[] split = s.split("\\(");
-                    return Tuple.tuple(
-                            Arrays.asList(split[0].split(" ")),
-                            Arrays.asList(
-                                    split[1].replaceAll("contains ", "").replaceAll("\\)", "").split(", ")
-                            )
-                    );
-                })
-                .collect(Collectors.toList());
-        Map<String, Set<String>> allergenes = new HashMap<>();
-        collect
-                .stream()
-                .flatMap(tuple -> tuple.v2.stream())
-                .forEach(allergen -> allergenes.put(allergen, new HashSet<>()));
+    public static long es1(Stream<String> rawInput) {
+        List<Tuple2<List<String>, List<String>>> input = parseInput(rawInput);
 
-        for (String allergen : allergenes.keySet()) {
-            Set<String> possible = allergenes.get(allergen);
-            for (Tuple2<List<String>, List<String>> tuple : collect) {
-                if (tuple.v2.contains(allergen)) {
-                    if (possible.isEmpty()) {
-                        possible.addAll(tuple.v1);
-                    } else {
-                        possible.retainAll(tuple.v1);
-                    }
-                }
-            }
-        }
+        Map<String, Set<String>> allergens = initAllergensMap(input);
+        determineAllergens(input, allergens);
 
-        while (true) {
-            List<String> sureAllergenes = new ArrayList<>();
-            for (Map.Entry<String, Set<String>> allergen : allergenes.entrySet()) {
-                Set<String> possible = allergen.getValue();
-                if (possible.size() == 1) {
-                    sureAllergenes.add(possible.iterator().next());
-                }
-            }
-            if (sureAllergenes.size() == allergenes.size())
-                break;
-            for (String allergenToBeDeleted : sureAllergenes) {
-                for (Map.Entry<String, Set<String>> allergen : allergenes.entrySet()) {
-                    if (allergen.getValue().size() != 1) {
-                        allergen.getValue().remove(allergenToBeDeleted);
-                    }
-                }
-            }
-        }
-
-        Map<String, Long> countOccurences = collect
+        Map<String, Long> countOccurrencesOfEachIngredient = input
                 .stream()
                 .flatMap(tuple -> tuple.v1.stream())
                 .collect(
@@ -67,20 +23,73 @@ public class Day21 {
                                 Collectors.counting())
                 );
 
-        Long countOfIngredients = countOccurences.values()
+        Long totalNumberOfIngredients = countOccurrencesOfEachIngredient.values()
                 .stream()
                 .reduce(1L, Long::sum);
 
-        Long countOfAllergenesOccurrences = allergenes.values()
+        Long countOfAllergensOccurrences = allergens.values()
                 .stream()
                 .flatMap(Collection::stream)
-                .map(countOccurences::get)
+                .map(countOccurrencesOfEachIngredient::get)
                 .reduce(1L, Long::sum);
-        return countOfIngredients - countOfAllergenesOccurrences;
+        return totalNumberOfIngredients - countOfAllergensOccurrences;
     }
 
-    public static String es2(Stream<String> input) {
-        List<Tuple2<List<String>, List<String>>> collect = input
+    public static String es2(Stream<String> rawInput) {
+        List<Tuple2<List<String>, List<String>>> input = parseInput(rawInput);
+
+        Map<String, Set<String>> allergens = initAllergensMap(input);
+        determineAllergens(input, allergens);
+
+        return allergens.keySet()
+                .stream()
+                .sorted()
+                .map(key -> allergens.get(key).iterator().next())
+                .collect(Collectors.joining(","));
+    }
+
+    private static void determineAllergens(List<Tuple2<List<String>, List<String>>> input, Map<String, Set<String>> allergens) {
+        for (String allergen : allergens.keySet()) {
+            Set<String> possible = allergens.get(allergen);
+            for (Tuple2<List<String>, List<String>> tuple : input) {
+                if (tuple.v2.contains(allergen)) {
+                    if (possible.isEmpty())
+                        possible.addAll(tuple.v1);
+                    else
+                        possible.retainAll(tuple.v1);
+                }
+            }
+        }
+
+        while (true) {
+            List<String> sureAllergens = new ArrayList<>();
+            for (Map.Entry<String, Set<String>> allergen : allergens.entrySet()) {
+                Set<String> possible = allergen.getValue();
+                if (possible.size() == 1)
+                    sureAllergens.add(possible.iterator().next());
+            }
+            if (sureAllergens.size() == allergens.size())
+                break;
+            for (String allergenToBeDeleted : sureAllergens) {
+                for (Map.Entry<String, Set<String>> allergen : allergens.entrySet()) {
+                    if (allergen.getValue().size() != 1)
+                        allergen.getValue().remove(allergenToBeDeleted);
+                }
+            }
+        }
+    }
+
+    private static Map<String, Set<String>> initAllergensMap(List<Tuple2<List<String>, List<String>>> input) {
+        Map<String, Set<String>> allergenes = new HashMap<>();
+        input
+                .stream()
+                .flatMap(tuple -> tuple.v2.stream())
+                .forEach(allergen -> allergenes.put(allergen, new HashSet<>()));
+        return allergenes;
+    }
+
+    private static List<Tuple2<List<String>, List<String>>> parseInput(Stream<String> input) {
+        return input
                 .map(s -> {
                     String[] split = s.split("\\(");
                     return Tuple.tuple(
@@ -91,48 +100,5 @@ public class Day21 {
                     );
                 })
                 .collect(Collectors.toList());
-        Map<String, Set<String>> allergenes = new HashMap<>();
-        collect
-                .stream()
-                .flatMap(tuple -> tuple.v2.stream())
-                .forEach(allergen -> allergenes.put(allergen, new HashSet<>()));
-
-        for (String allergen : allergenes.keySet()) {
-            Set<String> possible = allergenes.get(allergen);
-            for (Tuple2<List<String>, List<String>> tuple : collect) {
-                if (tuple.v2.contains(allergen)) {
-                    if (possible.isEmpty()) {
-                        possible.addAll(tuple.v1);
-                    } else {
-                        possible.retainAll(tuple.v1);
-                    }
-                }
-            }
-        }
-
-        while (true) {
-            List<String> sureAllergenes = new ArrayList<>();
-            for (Map.Entry<String, Set<String>> allergen : allergenes.entrySet()) {
-                Set<String> possible = allergen.getValue();
-                if (possible.size() == 1) {
-                    sureAllergenes.add(possible.iterator().next());
-                }
-            }
-            if (sureAllergenes.size() == allergenes.size())
-                break;
-            for (String allergenToBeDeleted : sureAllergenes) {
-                for (Map.Entry<String, Set<String>> allergen : allergenes.entrySet()) {
-                    if (allergen.getValue().size() != 1) {
-                        allergen.getValue().remove(allergenToBeDeleted);
-                    }
-                }
-            }
-        }
-
-        return allergenes.keySet()
-                .stream()
-                .sorted()
-                .map(key -> allergenes.get(key).iterator().next())
-                .collect(Collectors.joining(","));
     }
 }

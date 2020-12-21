@@ -33,7 +33,7 @@ public class Day21Test {
     @Test
     public void es2() {
         String x = Day21.es2(parseStrings(getTestInput("21")));
-//        assertEquals(1, x);
+        assertEquals("spcqmzfg,rpf,dzqlq,pflk,bltrbvz,xbdh,spql,bltzkxx", x);
         System.out.println(x);
     }
 }
