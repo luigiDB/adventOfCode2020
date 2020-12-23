@@ -3,6 +3,8 @@ package exercises;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.math.BigInteger;
+
 import static org.junit.Assert.assertEquals;
 import static utilities.AOCTestFramework.getTestInput;
 import static utilities.AOCTestFramework.parseStrings;
@@ -28,13 +30,13 @@ public class Day23Test {
 
     @Test
     public void es2Test() {
-        assertEquals(0, Day23.es2("389125467"));
+        assertEquals(149245887792L, Day23.es2("389125467", 10000000, 1000000));
     }
 
     @Test
     public void es2() {
-        long x = Day23.es2("327465189");
-//        assertEquals(1, x);
+        long x = Day23.es2("327465189", 10000000, 1000000);
+        assertEquals(474600314018L, x);
         System.out.println(x);
     }
 }
