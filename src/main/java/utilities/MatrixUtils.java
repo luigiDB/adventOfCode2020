@@ -25,7 +25,9 @@ public class MatrixUtils {
     public static <T> void printMatrix(T[][] a) {
         for (T[] row : a) {
             for (T elem : row)
-                System.out.print(elem!=null?elem.toString():"_" + '\t');
+                System.out.print(elem!=null
+                        ?elem.toString() + '\t'
+                        :"_" + '\t');
             System.out.println();
         }
         System.out.println();
@@ -47,7 +49,7 @@ public class MatrixUtils {
         int wide = matrix[0].length;
         for (int x = 0; x < height; x++) {
             for (int y = 0; y < wide; y++) {
-                matrix[x][y] = (T) SerializationUtils.clone(filler);
+                matrix[x][y] = SerializationUtils.clone(filler);
             }
         }
     }
@@ -57,7 +59,7 @@ public class MatrixUtils {
         int wide = matrix[0].length;
 
         List<T> filling = generator.get()
-                .slice(0, (long) (height * wide) + 1).collect(Collectors.toList());
+                .slice(0, ((long) height * wide) + 1).collect(Collectors.toList());
         for (int x = 0; x < height; x++) {
             for (int y = 0; y < wide; y++) {
                 matrix[x][y] = filling.get(x * height + y);
@@ -207,7 +209,7 @@ public class MatrixUtils {
      * @param pos              starting point (row-column)
      * @param lookingDirection direction (row-column displacement)
      * @param <T>              the type of the matrix
-     * @return
+     * @return A stream of the visited elements
      */
     public static <T> Stream<T> look(T[][] matrix, Tuple2<Integer, Integer> pos, Tuple2<Integer, Integer> lookingDirection) {
         int height = matrix.length;

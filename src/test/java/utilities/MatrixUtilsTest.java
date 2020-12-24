@@ -21,8 +21,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.*;
 import static utilities.MatrixUtils.cardinalNeighbors;
 import static utilities.MatrixUtils.intGenerator;
@@ -35,8 +36,7 @@ public class MatrixUtilsTest {
     private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
-    private Tuple2<Integer, Integer> firstElem = Tuple.tuple(0, 0);
-    ;
+    private final Tuple2<Integer, Integer> firstElem = Tuple.tuple(0, 0);
 
     @Before
     public void setUp() {
@@ -56,18 +56,18 @@ public class MatrixUtilsTest {
     @Test
     public void printMatrix() {
         MatrixUtils.printMatrix(originalMatrix);
-        String expectedrint = "0\t1\t2\t3\t4\t\r\n" +
+        String expecteprint = "0\t1\t2\t3\t4\t\r\n" +
                 "5\t6\t7\t8\t9\t\r\n" +
                 "10\t11\t12\t13\t14\t\r\n" +
                 "15\t16\t17\t18\t19\t\r\n" +
                 "20\t21\t22\t23\t24\t\r\n" +
                 "\r\n";
-        assertEquals(expectedrint, outContent.toString());
+        assertEquals(expecteprint, outContent.toString());
     }
 
     @Test
     public void fillMatrix() {
-        MatrixUtils.fillMatrix(originalMatrix, Integer.valueOf(0));
+        MatrixUtils.fillMatrix(originalMatrix, 0);
         assertEquals(25, MatrixUtils.countOccurrences(originalMatrix, 0));
     }
 
@@ -142,9 +142,7 @@ public class MatrixUtilsTest {
                         // skip all
                         Tuple.tuple(Tuple.tuple(2, 0), Tuple.tuple(-1, -1), x -> x < 10, x -> true, false)
                 );
-        tests.forEach(test -> {
-            assertEquals(test.v5, MatrixUtils.lookForFirstMatch(originalMatrix, test.v1, test.v2, test.v3, test.v4));
-        });
+        tests.forEach(test -> assertEquals(test.v5, MatrixUtils.lookForFirstMatch(originalMatrix, test.v1, test.v2, test.v3, test.v4)));
     }
 
     @Test
