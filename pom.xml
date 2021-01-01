@@ -60,5 +60,11 @@
         </dependency>
     </dependencies>
 
-
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub OWNER Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/luigiDB/adventOfCode2020</url>
+        </repository>
+    </distributionManagement>
 </project>
