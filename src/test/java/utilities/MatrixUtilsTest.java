@@ -22,10 +22,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.*;
-import static utilities.MatrixUtils.cardinalNeighbors;
+import static utilities.MatrixUtils.cardinalNeighborsWithPositions;
 import static utilities.MatrixUtils.intGenerator;
 
 public class MatrixUtilsTest {
@@ -37,6 +37,7 @@ public class MatrixUtilsTest {
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
     private final Tuple2<Integer, Integer> firstElem = Tuple.tuple(0, 0);
+    private static final String EOL = System.getProperty("line.separator");
 
     @Before
     public void setUp() {
@@ -54,14 +55,26 @@ public class MatrixUtilsTest {
     }
 
     @Test
-    public void printMatrix() {
+    public void printMatrixDefault() {
         MatrixUtils.printMatrix(originalMatrix);
-        String expecteprint = "0\t1\t2\t3\t4\t\r\n" +
-                "5\t6\t7\t8\t9\t\r\n" +
-                "10\t11\t12\t13\t14\t\r\n" +
-                "15\t16\t17\t18\t19\t\r\n" +
-                "20\t21\t22\t23\t24\t\r\n" +
-                "\r\n";
+        String expecteprint = "0\t1\t2\t3\t4\t" + EOL +
+                "5\t6\t7\t8\t9\t" + EOL +
+                "10\t11\t12\t13\t14\t" + EOL +
+                "15\t16\t17\t18\t19\t" + EOL +
+                "20\t21\t22\t23\t24\t" + EOL +
+                EOL;
+        assertEquals(expecteprint, outContent.toString());
+    }
+
+    @Test
+    public void printMatrixWithOverride() {
+        MatrixUtils.printMatrix(originalMatrix, number -> String.valueOf(number * 10));
+        String expecteprint = "   0  10  20  30  40" + EOL +
+                "  50  60  70  80  90" + EOL +
+                " 100 110 120 130 140" + EOL +
+                " 150 160 170 180 190" + EOL +
+                " 200 210 220 230 240" + EOL +
+                EOL;
         assertEquals(expecteprint, outContent.toString());
     }
 
@@ -104,7 +117,7 @@ public class MatrixUtilsTest {
                         Tuple.tuple(Tuple.tuple(4, 4), Seq.seq(IntStream.of(18, 19, 23).boxed()))
                 );
         tests.forEach(test -> {
-            Seq<Integer> neighbors = Seq.seq(MatrixUtils.neighbors(originalMatrix, test.v1()));
+            Seq<Integer> neighbors = Seq.seq(MatrixUtils.planeNeighbors(originalMatrix, test.v1()));
             assertTrue(neighbors.containsAll(test.v2));
         });
     }
@@ -180,7 +193,7 @@ public class MatrixUtilsTest {
         for (int row = 0; row < matrix.length; row++) {
             for (int column = 0; column < matrix[0].length; column++) {
                 Tuple2<Integer, Integer> center = Tuple.tuple(row, column);
-                cardinalNeighbors(matrix, center)
+                cardinalNeighborsWithPositions(matrix, center)
                         .forEach(neighbor -> {
                             graph.addVertex(center);
                             Tuple2<Integer, Integer> neighborCoordinate = Tuple.tuple(neighbor.v1, neighbor.v2);
@@ -237,7 +250,7 @@ public class MatrixUtilsTest {
 
     @Test
     public void clearDirections() {
-        assertThat( MatrixUtils.clearDirections(originalMatrix, firstElem, 5).collect(Collectors.toList()),
+        assertThat(MatrixUtils.clearDirections(originalMatrix, firstElem, 5).collect(Collectors.toList()),
                 contains(
                         Tuple.tuple(1, 0)
                 ));
