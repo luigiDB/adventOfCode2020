@@ -1,8 +1,8 @@
 name: deploy artifacts
 on:
   push:
-    tags:
-      - release*
+    branches:
+      - tryRelease
 jobs:
   run-tests:
     runs-on: ubuntu-latest
